@@ -1,18 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
 import { toast } from "sonner";
-import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
+import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — LitProxy" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Litproxy" }] }),
   component: Dashboard,
 });
 
@@ -26,13 +23,11 @@ interface LightningKey {
   last_error: string | null;
   created_at: string;
 }
-
 interface Settings {
   user_id: string;
   default_model: string;
   proxy_api_key: string;
 }
-
 interface LogRow {
   id: string;
   model_requested: string | null;
@@ -132,62 +127,69 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="mx-auto max-w-6xl space-y-8 px-6 py-10">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Manage keys, default model, and view request logs.</p>
-        </div>
 
-        {/* Endpoint card */}
-        <section className="rounded-2xl border border-border/60 bg-card/40 p-6 shadow-elegant">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Your endpoint</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            <div>
-              <Label className="text-xs text-muted-foreground">Base URL (OpenAI-compatible)</Label>
-              <div className="mt-1 flex gap-2">
-                <Input readOnly value={endpoint} className="font-mono text-xs" />
-                <Button variant="outline" size="icon" onClick={() => copy(endpoint, "URL copied")}>
-                  <Copy className="h-4 w-4" />
-                </Button>
+      {/* Masthead */}
+      <section className="border-b border-border">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-6 pt-16 pb-10">
+          <div>
+            <p className="eyebrow">Volume III · Your desk</p>
+            <h1 className="mt-3 font-serif-italic text-6xl leading-none">Dashboard.</h1>
+          </div>
+          <Link to="/playground" className="cta-primary text-ink/70 hover:text-magenta">
+            Open playground →
+          </Link>
+        </div>
+      </section>
+
+      <div className="mx-auto max-w-6xl space-y-16 px-6 py-12">
+        {/* Endpoint */}
+        <section>
+          <SectionHeader n="01" title="Your endpoint" lede="One URL. One key. OpenAI-compatible." />
+          <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <Field label="Base URL">
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value={endpoint}
+                  className="w-full border-0 border-b border-border bg-transparent py-2 font-mono text-[13px] text-ink/80 focus:outline-none"
+                />
+                <IconBtn onClick={() => copy(endpoint, "URL copied")}><Copy className="h-3.5 w-3.5" /></IconBtn>
               </div>
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">Proxy API key</Label>
-              <div className="mt-1 flex gap-2">
-                <Input
+            </Field>
+            <Field label="Proxy API key">
+              <div className="flex items-center gap-2">
+                <input
                   readOnly
                   type={showProxy ? "text" : "password"}
                   value={settings?.proxy_api_key || ""}
-                  className="font-mono text-xs"
+                  className="w-full border-0 border-b border-border bg-transparent py-2 font-mono text-[13px] text-ink/80 focus:outline-none"
                 />
-                <Button variant="outline" size="icon" onClick={() => setShowProxy((v) => !v)}>
-                  {showProxy ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-                <Button variant="outline" size="icon" onClick={() => copy(settings?.proxy_api_key || "", "Key copied")}>
-                  <Copy className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" onClick={rotateProxy} title="Rotate key">
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
+                <IconBtn onClick={() => setShowProxy((v) => !v)}>
+                  {showProxy ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                </IconBtn>
+                <IconBtn onClick={() => copy(settings?.proxy_api_key || "", "Key copied")}>
+                  <Copy className="h-3.5 w-3.5" />
+                </IconBtn>
+                <IconBtn onClick={rotateProxy} title="Rotate"><RefreshCw className="h-3.5 w-3.5" /></IconBtn>
               </div>
-            </div>
+            </Field>
           </div>
-          <pre className="mt-4 overflow-x-auto rounded-lg border border-border/60 bg-background/40 p-4 text-xs">
+
+          <pre className="mt-8 overflow-x-auto border border-border bg-paper p-5 font-mono text-[12px] leading-6 text-ink/85">
 {`curl ${endpoint}/chat/completions \\
   -H "Authorization: Bearer ${settings?.proxy_api_key || "<your_key>"}" \\
   -H "Content-Type: application/json" \\
-  -d '{"model": "${settings?.default_model || "openai/gpt-5-mini"}", "messages":[{"role":"user","content":"Hi"}]}'`}
+  -d '{"model": "default", "messages":[{"role":"user","content":"Hi"}]}'`}
           </pre>
         </section>
 
         {/* Default model */}
-        <section className="rounded-2xl border border-border/60 bg-card/40 p-6">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Default model</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Used when a request omits the <code>model</code> field.</p>
+        <section>
+          <SectionHeader n="02" title="Default model" lede={`Used when a request omits the model field, or sends "default" / "none".`} />
           <select
             value={settings?.default_model || ""}
             onChange={(e) => updateModel(e.target.value)}
-            className="mt-3 w-full max-w-md rounded-md border border-border bg-background px-3 py-2 text-sm"
+            className="mt-6 w-full max-w-xl border-0 border-b border-border bg-transparent py-2 text-[15px] focus:border-ink focus:outline-none"
           >
             {MODELS.map((m) => (
               <option key={m.id} value={m.id}>
@@ -198,59 +200,80 @@ function Dashboard() {
         </section>
 
         {/* Lightning keys */}
-        <section className="rounded-2xl border border-border/60 bg-card/40 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Lightning AI keys ({keys.length})</h2>
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Keys rotate by least-recently-used. If one fails, we try the next active key.
-          </p>
+        <section>
+          <SectionHeader
+            n="03"
+            title={`Lightning AI keys · ${keys.length}`}
+            lede="Keys rotate by least-recent use. If one fails, the next is tried."
+          />
 
-          <form onSubmit={addKey} className="mt-4 grid gap-2 md:grid-cols-[1fr_2fr_auto]">
-            <Input placeholder="Label (e.g. personal)" value={newLabel} onChange={(e) => setNewLabel(e.target.value)} />
-            <Input placeholder="Lightning AI API key" value={newKey} onChange={(e) => setNewKey(e.target.value)} />
-            <Button type="submit" disabled={adding}>
-              <Plus className="h-4 w-4" /> Add
-            </Button>
+          <form onSubmit={addKey} className="mt-6 grid gap-3 md:grid-cols-[1fr_2fr_auto]">
+            <input
+              placeholder="Label (e.g. personal)"
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              className="border border-border bg-paper px-3 py-2.5 text-[14px] focus:border-ink focus:outline-none"
+            />
+            <input
+              placeholder="Lightning AI API key"
+              value={newKey}
+              onChange={(e) => setNewKey(e.target.value)}
+              className="border border-border bg-paper px-3 py-2.5 font-mono text-[12px] focus:border-ink focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={adding}
+              className="cta-primary inline-flex items-center gap-2 bg-ink px-6 py-2.5 text-paper hover:bg-magenta"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add
+            </button>
           </form>
 
-          <div className="mt-6 space-y-2">
+          <div className="mt-8 divide-y divide-border border-y border-border">
             {keys.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border/60 p-8 text-center text-sm text-muted-foreground">
-                No keys yet. Add one to start making requests.
+              <div className="py-12 text-center font-display text-lg italic text-ash">
+                No keys yet. Add one to begin.
               </div>
             )}
-            {keys.map((k) => (
-              <div key={k.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 p-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{k.label}</span>
+            {keys.map((k, i) => (
+              <div key={k.id} className="grid grid-cols-12 items-center gap-4 py-5">
+                <span className="col-span-1 font-mono text-[11px] text-ash">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="col-span-7 min-w-0">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-display text-xl italic">{k.label}</span>
                     {k.is_active ? (
-                      <span className="rounded-full bg-success/15 px-2 py-0.5 text-xs text-success">active</span>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-success">active</span>
                     ) : (
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">paused</span>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-ash">paused</span>
                     )}
                     {k.failure_count > 0 && (
-                      <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-destructive">
                         {k.failure_count} fail
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 truncate font-mono text-xs text-muted-foreground">
+                  <div className="mt-1 truncate font-mono text-[11px] text-ink/55">
                     {k.api_key.slice(0, 6)}…{k.api_key.slice(-4)}
                     {k.last_used_at && ` · used ${formatDistanceToNow(new Date(k.last_used_at))} ago`}
                   </div>
                   {k.last_error && (
-                    <div className="mt-1 truncate text-xs text-destructive">last error: {k.last_error}</div>
+                    <div className="mt-1 truncate text-[11px] text-destructive">
+                      last error: {k.last_error}
+                    </div>
                   )}
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => toggleKey(k.id, k.is_active)}>
+                <div className="col-span-4 flex items-center justify-end gap-2">
+                  <button
+                    onClick={() => toggleKey(k.id, k.is_active)}
+                    className="cta-primary text-ink/60 hover:text-magenta"
+                  >
                     {k.is_active ? "Pause" : "Activate"}
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={() => removeKey(k.id)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+                  </button>
+                  <IconBtn onClick={() => removeKey(k.id)}>
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </IconBtn>
                 </div>
               </div>
             ))}
@@ -258,62 +281,65 @@ function Dashboard() {
         </section>
 
         {/* Logs */}
-        <section className="rounded-2xl border border-border/60 bg-card/40 p-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Recent requests ({logs.length})
-            </h2>
-            <div className="flex gap-4 text-xs text-muted-foreground">
-              <span>Total tokens: <span className="text-foreground">{totalTokens.toLocaleString()}</span></span>
-              <span>Total cost: <span className="text-primary">${totalCost.toFixed(4)}</span></span>
-              <Button size="sm" variant="ghost" onClick={refresh}>
+        <section>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionHeader n="04" title={`The ledger · ${logs.length}`} lede="Every request, with its tokens, latency, and cost." />
+            <div className="flex items-center gap-6 font-mono text-[11px] uppercase tracking-wider text-ash">
+              <span>
+                Tokens <span className="text-ink">{totalTokens.toLocaleString()}</span>
+              </span>
+              <span>
+                Cost <span className="text-magenta">${totalCost.toFixed(4)}</span>
+              </span>
+              <button onClick={refresh} className="hover:text-ink">
                 <RefreshCw className="h-3 w-3" />
-              </Button>
+              </button>
             </div>
           </div>
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="text-left text-muted-foreground">
-                <tr>
-                  <th className="px-2 py-2">Time</th>
-                  <th className="px-2 py-2">Status</th>
-                  <th className="px-2 py-2">Model</th>
-                  <th className="px-2 py-2">Key</th>
-                  <th className="px-2 py-2 text-right">Tokens</th>
-                  <th className="px-2 py-2 text-right">Cost</th>
-                  <th className="px-2 py-2 text-right">Latency</th>
-                  <th className="px-2 py-2">Error</th>
+
+          <div className="mt-6 overflow-x-auto border-y border-border">
+            <table className="w-full text-[12px]">
+              <thead>
+                <tr className="border-b border-border text-left font-mono text-[10px] uppercase tracking-wider text-ash">
+                  <th className="px-3 py-3">Time</th>
+                  <th className="px-3 py-3">Status</th>
+                  <th className="px-3 py-3">Model</th>
+                  <th className="px-3 py-3">Key</th>
+                  <th className="px-3 py-3 text-right">Tokens</th>
+                  <th className="px-3 py-3 text-right">Cost</th>
+                  <th className="px-3 py-3 text-right">Latency</th>
+                  <th className="px-3 py-3">Error</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="px-2 py-8 text-center text-muted-foreground">No requests yet.</td>
+                    <td colSpan={8} className="py-12 text-center font-display text-lg italic text-ash">
+                      No requests yet.
+                    </td>
                   </tr>
                 )}
                 {logs.map((l) => (
-                  <tr key={l.id} className="border-t border-border/30">
-                    <td className="px-2 py-2 whitespace-nowrap text-muted-foreground">
+                  <tr key={l.id} className="border-b border-border last:border-0 hover:bg-paper">
+                    <td className="px-3 py-3 whitespace-nowrap text-ash">
                       {formatDistanceToNow(new Date(l.created_at), { addSuffix: true })}
                     </td>
-                    <td className="px-2 py-2">
-                      {l.status === "success" ? (
-                        <span className="inline-flex items-center gap-1 text-success"><CheckCircle2 className="h-3 w-3" />{l.http_status}</span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-destructive"><XCircle className="h-3 w-3" />{l.http_status || "ERR"}</span>
-                      )}
-                      {(l.attempts || 1) > 1 && <span className="ml-1 text-muted-foreground">×{l.attempts}</span>}
+                    <td className="px-3 py-3">
+                      <span className={l.status === "success" ? "text-success" : "text-destructive"}>
+                        {l.http_status || "ERR"}
+                      </span>
+                      {(l.attempts || 1) > 1 && <span className="ml-1 text-ash">×{l.attempts}</span>}
                     </td>
-                    <td className="px-2 py-2 font-mono">{l.model_used || "—"}</td>
-                    <td className="px-2 py-2 text-muted-foreground">{l.lightning_key_label || "—"}</td>
-                    <td className="px-2 py-2 text-right">
+                    <td className="px-3 py-3 font-mono">{l.model_used || "—"}</td>
+                    <td className="px-3 py-3 text-ink/70">{l.lightning_key_label || "—"}</td>
+                    <td className="px-3 py-3 text-right">
                       {l.prompt_tokens != null ? `${l.prompt_tokens}+${l.completion_tokens}` : "—"}
                     </td>
-                    <td className="px-2 py-2 text-right text-primary">
+                    <td className="px-3 py-3 text-right text-magenta">
                       {l.cost_usd != null ? `$${Number(l.cost_usd).toFixed(5)}` : "—"}
                     </td>
-                    <td className="px-2 py-2 text-right text-muted-foreground">{l.latency_ms ?? "—"}ms</td>
-                    <td className="max-w-xs truncate px-2 py-2 text-destructive" title={l.error_message || ""}>
+                    <td className="px-3 py-3 text-right text-ash">{l.latency_ms ?? "—"}ms</td>
+                    <td className="max-w-xs truncate px-3 py-3 text-destructive" title={l.error_message || ""}>
                       {l.error_message || ""}
                     </td>
                   </tr>
@@ -324,5 +350,47 @@ function Dashboard() {
         </section>
       </div>
     </div>
+  );
+}
+
+function SectionHeader({ n, title, lede }: { n: string; title: string; lede: string }) {
+  return (
+    <div className="border-b border-border pb-4">
+      <div className="flex items-baseline gap-4">
+        <span className="font-serif-italic text-2xl text-magenta">{n}</span>
+        <h2 className="font-display text-3xl italic">{title}</h2>
+      </div>
+      <p className="mt-2 max-w-2xl text-[14px] text-ink/65">{lede}</p>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="eyebrow block">{label}</span>
+      <div className="mt-1.5">{children}</div>
+    </label>
+  );
+}
+
+function IconBtn({
+  children,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  title?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      title={title}
+      className="grid h-9 w-9 shrink-0 place-items-center border border-border bg-paper text-ink/60 hover:border-ink hover:text-ink"
+    >
+      {children}
+    </button>
   );
 }

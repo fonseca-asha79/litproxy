@@ -14,6 +14,7 @@ import { Route as ModelsRouteImport } from './routes/models'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedPlaygroundRouteImport } from './routes/_authenticated/playground'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
@@ -42,6 +43,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedPlaygroundRoute = AuthenticatedPlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/models': typeof ModelsRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/playground': typeof AuthenticatedPlaygroundRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/models': typeof ModelsRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/playground': typeof AuthenticatedPlaygroundRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/models': typeof ModelsRoute
   '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/playground': typeof AuthenticatedPlaygroundRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/models'
     | '/register'
     | '/dashboard'
+    | '/playground'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesByTo: FileRoutesByTo
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/models'
     | '/register'
     | '/dashboard'
+    | '/playground'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   id:
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/models'
     | '/register'
     | '/_authenticated/dashboard'
+    | '/_authenticated/playground'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesById: FileRoutesById
@@ -166,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/playground': {
+      id: '/_authenticated/playground'
+      path: '/playground'
+      fullPath: '/playground'
+      preLoaderRoute: typeof AuthenticatedPlaygroundRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -192,10 +211,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedPlaygroundRoute: typeof AuthenticatedPlaygroundRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedPlaygroundRoute: AuthenticatedPlaygroundRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

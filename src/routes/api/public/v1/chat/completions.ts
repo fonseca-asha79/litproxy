@@ -53,13 +53,21 @@ async function handle(request: Request) {
   body.model = modelToUse;
   const isStream = !!body?.stream;
 
+  // Optional: force a specific Lightning key (used by the playground).
+  const forcedKeyId =
+    request.headers.get("x-lightning-key-id") ||
+    url.searchParams.get("lightning_key_id") ||
+    "";
+
   // Fetch user's active Lightning keys (rotate by least-recently-used)
-  const { data: keys } = await supabaseAdmin
+  let query = supabaseAdmin
     .from("lightning_keys")
     .select("id, label, api_key, last_used_at")
     .eq("user_id", settings.user_id)
     .eq("is_active", true)
     .order("last_used_at", { ascending: true, nullsFirst: true });
+  if (forcedKeyId) query = query.eq("id", forcedKeyId);
+  const { data: keys } = await query;
 
   if (!keys || keys.length === 0) {
     await logRequest({
@@ -231,7 +239,7 @@ export const Route = createFileRoute("/api/public/v1/chat/completions")({
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Lightning-Key-Id",
           },
         }),
       POST: async ({ request }) => handle(request),
