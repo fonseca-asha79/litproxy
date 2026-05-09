@@ -28,7 +28,7 @@ function Playground() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [keys, setKeys] = useState<KeyRow[]>([]);
   const [model, setModel] = useState("default");
-  const [keyId, setKeyId] = useState("auto"); // "auto" = rotation, otherwise force key
+  const [keyId, setKeyId] = useState("auto");
   const [system, setSystem] = useState("");
   const [user_msg, setUserMsg] = useState("Write a haiku about quiet infrastructure.");
   const [temperature, setTemperature] = useState("0.7");
@@ -109,163 +109,172 @@ function Playground() {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <section className="border-b border-border">
-        <div className="mx-auto max-w-6xl px-6 pt-16 pb-10">
-          <p className="eyebrow">Workshop</p>
-          <h1 className="mt-3 font-serif-italic text-6xl leading-none">Playground.</h1>
-          <p className="mt-5 max-w-xl font-display text-lg italic text-ink/70">
-            Compose a request. Pick a model. Choose which key to send it through. The
-            response, latency and status are kept for the session.
+      <section className="border-b border-hairline">
+        <div className="mx-auto max-w-6xl px-6 pt-12 pb-8">
+          <p className="eyebrow">Playground</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">Test your endpoint</h1>
+          <p className="mt-3 max-w-xl text-[14px] text-foreground/60">
+            Compose a request, pick a model, choose which key to send it through. Hits the same
+            public endpoint your apps would.
           </p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-6 py-12">
-        <div className="grid gap-12 lg:grid-cols-12">
+      <section className="mx-auto max-w-6xl px-6 py-10">
+        <div className="grid gap-6 lg:grid-cols-12">
           {/* Controls */}
           <aside className="lg:col-span-4">
-            <h2 className="font-display text-2xl italic">Configuration</h2>
+            <div className="rounded-2xl border border-hairline bg-surface/40 p-6">
+              <h2 className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">Configuration</h2>
 
-            <div className="mt-6 space-y-6">
-              <Field label="Model">
-                <select
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  className="w-full border-0 border-b border-border bg-transparent py-2 text-[15px] focus:border-ink focus:outline-none"
-                >
-                  <option value="default">
-                    default — uses {settings?.default_model || "your dashboard default"}
-                  </option>
-                  {MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name} ({m.id})
+              <div className="mt-5 space-y-5">
+                <Field label="Model">
+                  <select
+                    value={model}
+                    onChange={(e) => setModel(e.target.value)}
+                    className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                  >
+                    <option value="default">
+                      default — uses {settings?.default_model || "your dashboard default"}
                     </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field label="Lightning key">
-                <select
-                  value={keyId}
-                  onChange={(e) => setKeyId(e.target.value)}
-                  className="w-full border-0 border-b border-border bg-transparent py-2 text-[15px] focus:border-ink focus:outline-none"
-                >
-                  <option value="auto">Auto — rotate / fall back ({keys.length})</option>
-                  {keys.map((k) => (
-                    <option key={k.id} value={k.id}>
-                      {k.label}
-                    </option>
-                  ))}
-                </select>
-                {keys.length === 0 && (
-                  <p className="mt-2 text-[12px] text-destructive">
-                    No active keys. Add one in the dashboard first.
-                  </p>
-                )}
-              </Field>
-
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="Temperature">
-                  <input
-                    value={temperature}
-                    onChange={(e) => setTemperature(e.target.value)}
-                    placeholder="0.7"
-                    className="w-full border-0 border-b border-border bg-transparent py-2 text-[15px] focus:border-ink focus:outline-none"
-                  />
+                    {MODELS.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} ({m.id})
+                      </option>
+                    ))}
+                  </select>
                 </Field>
-                <Field label="Max tokens">
-                  <input
-                    value={maxTokens}
-                    onChange={(e) => setMaxTokens(e.target.value)}
-                    placeholder="auto"
-                    className="w-full border-0 border-b border-border bg-transparent py-2 text-[15px] focus:border-ink focus:outline-none"
-                  />
-                </Field>
-              </div>
 
-              <div className="border-t border-border pt-6">
-                <p className="eyebrow">Endpoint</p>
-                <p className="mt-2 break-all font-mono text-[11px] text-ink/60">{endpoint}</p>
+                <Field label="Lightning key">
+                  <select
+                    value={keyId}
+                    onChange={(e) => setKeyId(e.target.value)}
+                    className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                  >
+                    <option value="auto">Auto — rotate / fallback ({keys.length})</option>
+                    {keys.map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {k.label}
+                      </option>
+                    ))}
+                  </select>
+                  {keys.length === 0 && (
+                    <p className="mt-2 text-[12px] text-destructive">
+                      No active keys. Add one in the dashboard first.
+                    </p>
+                  )}
+                </Field>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <Field label="Temperature">
+                    <input
+                      value={temperature}
+                      onChange={(e) => setTemperature(e.target.value)}
+                      placeholder="0.7"
+                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                    />
+                  </Field>
+                  <Field label="Max tokens">
+                    <input
+                      value={maxTokens}
+                      onChange={(e) => setMaxTokens(e.target.value)}
+                      placeholder="auto"
+                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                    />
+                  </Field>
+                </div>
+
+                <div className="border-t border-hairline pt-4">
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">Endpoint</p>
+                  <p className="mt-1.5 break-all font-mono text-[11px] text-foreground/55">{endpoint}</p>
+                </div>
               </div>
             </div>
           </aside>
 
           {/* Messages + response */}
           <div className="lg:col-span-8">
-            <h2 className="font-display text-2xl italic">Composition</h2>
+            <div className="rounded-2xl border border-hairline bg-surface/40 p-6">
+              <h2 className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">Composition</h2>
 
-            <Field label="System (optional)" className="mt-6">
-              <textarea
-                value={system}
-                onChange={(e) => setSystem(e.target.value)}
-                rows={2}
-                placeholder="You are a helpful assistant…"
-                className="w-full resize-y border border-border bg-paper p-3 font-mono text-[13px] focus:border-ink focus:outline-none"
-              />
-            </Field>
+              <div className="mt-5 space-y-4">
+                <Field label="System (optional)">
+                  <textarea
+                    value={system}
+                    onChange={(e) => setSystem(e.target.value)}
+                    rows={2}
+                    placeholder="You are a helpful assistant…"
+                    className="w-full resize-y rounded-md border border-hairline bg-background p-3 font-mono text-[12.5px] focus:border-brand focus:outline-none"
+                  />
+                </Field>
 
-            <Field label="User message" className="mt-6">
-              <textarea
-                value={user_msg}
-                onChange={(e) => setUserMsg(e.target.value)}
-                rows={5}
-                className="w-full resize-y border border-border bg-paper p-3 font-mono text-[13px] focus:border-ink focus:outline-none"
-              />
-            </Field>
+                <Field label="User message">
+                  <textarea
+                    value={user_msg}
+                    onChange={(e) => setUserMsg(e.target.value)}
+                    rows={5}
+                    className="w-full resize-y rounded-md border border-hairline bg-background p-3 font-mono text-[12.5px] focus:border-brand focus:outline-none"
+                  />
+                </Field>
+              </div>
 
-            <div className="mt-6 flex items-center gap-4">
-              <button
-                onClick={run}
-                disabled={running}
-                className="cta-primary inline-flex items-center gap-2 bg-ink px-8 py-3 text-paper transition-colors hover:bg-magenta disabled:opacity-60"
-              >
-                <Play className="h-3.5 w-3.5" />
-                {running ? "Sending…" : "Send request"}
-              </button>
-              <button
-                onClick={() => {
-                  setResponse(null);
-                  setSystem("");
-                  setUserMsg("");
-                }}
-                className="cta-primary inline-flex items-center gap-2 text-ink/60 hover:text-magenta"
-              >
-                <Eraser className="h-3.5 w-3.5" /> Clear
-              </button>
+              <div className="mt-5 flex items-center gap-3">
+                <button
+                  onClick={run}
+                  disabled={running}
+                  className="inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[13.5px] font-medium text-primary-foreground transition-colors hover:bg-brand-deep disabled:opacity-60"
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  {running ? "Sending…" : "Send request"}
+                </button>
+                <button
+                  onClick={() => {
+                    setResponse(null);
+                    setSystem("");
+                    setUserMsg("");
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-hairline px-4 py-2.5 text-[13px] text-foreground/70 hover:border-foreground/40 hover:text-foreground"
+                >
+                  <Eraser className="h-3.5 w-3.5" /> Clear
+                </button>
+              </div>
             </div>
 
             {/* Response */}
-            <div className="mt-10 border-t border-border pt-8">
+            <div className="mt-6 rounded-2xl border border-hairline bg-surface/40 p-6">
               <div className="flex items-baseline justify-between">
-                <h3 className="font-display text-2xl italic">Response</h3>
+                <h3 className="text-[14px] font-semibold uppercase tracking-wider text-muted-foreground">Response</h3>
                 {response && (
-                  <div className="flex items-center gap-4 font-mono text-[11px] uppercase tracking-wider">
-                    <span className={response.status >= 200 && response.status < 300 ? "text-success" : "text-destructive"}>
+                  <div className="flex items-center gap-3 font-mono text-[11px]">
+                    <span
+                      className={
+                        "rounded-full px-2 py-0.5 " +
+                        (response.status >= 200 && response.status < 300
+                          ? "border border-success/30 bg-success/10 text-success"
+                          : "border border-destructive/30 bg-destructive/10 text-destructive")
+                      }
+                    >
                       {response.status || "ERR"}
                     </span>
-                    <span className="text-ash">{response.ms}ms</span>
+                    <span className="text-muted-foreground">{response.ms}ms</span>
                   </div>
                 )}
               </div>
 
               {!response && !running && (
-                <p className="mt-6 font-display text-lg italic text-ash">
-                  Awaiting your first request…
-                </p>
+                <p className="mt-5 text-[13px] text-muted-foreground">Awaiting your first request…</p>
               )}
-              {running && (
-                <p className="mt-6 font-display text-lg italic text-ash">Sending…</p>
-              )}
+              {running && <p className="mt-5 text-[13px] text-muted-foreground">Sending…</p>}
               {response && (
                 <>
-                  <pre className="mt-6 max-h-[400px] overflow-auto whitespace-pre-wrap border border-border bg-paper p-5 font-mono text-[13px] leading-6 text-ink">
+                  <pre className="mt-5 max-h-[400px] overflow-auto whitespace-pre-wrap rounded-lg border border-hairline bg-background p-4 font-mono text-[12.5px] leading-6 text-foreground/90">
                     {response.content}
                   </pre>
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-[11px] uppercase tracking-[0.2em] text-ash hover:text-ink">
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-[11px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground">
                       Raw JSON
                     </summary>
-                    <pre className="mt-3 max-h-[300px] overflow-auto border border-border bg-background p-4 font-mono text-[11px] leading-5 text-ink/70">
+                    <pre className="mt-2 max-h-[300px] overflow-auto rounded-lg border border-hairline bg-background p-4 font-mono text-[11px] leading-5 text-foreground/70">
                       {JSON.stringify(response.raw, null, 2)}
                     </pre>
                   </details>
@@ -279,19 +288,11 @@ function Playground() {
   );
 }
 
-function Field({
-  label,
-  children,
-  className = "",
-}: {
-  label: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className={"block " + className}>
-      <span className="eyebrow block">{label}</span>
-      <div className="mt-1.5">{children}</div>
+    <label className="block">
+      <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      {children}
     </label>
   );
 }
