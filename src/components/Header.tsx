@@ -1,6 +1,4 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Zap, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,37 +12,46 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-primary shadow-glow">
-            <Zap className="h-4 w-4 text-primary-foreground" />
-          </span>
-          <span className="text-base">LitProxy</span>
+    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+        <Link to="/" className="flex items-baseline gap-2">
+          <span className="font-serif-italic text-2xl leading-none">Litproxy</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-magenta" />
         </Link>
-        <nav className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
-          <Link to="/" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Home</Link>
-          <Link to="/models" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Models</Link>
+
+        <nav className="hidden items-center gap-9 text-[13px] md:flex">
+          <Link to="/" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Home</Link>
+          <Link to="/models" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Models</Link>
           {user && (
-            <Link to="/dashboard" className="hover:text-foreground" activeProps={{ className: "text-foreground" }}>Dashboard</Link>
+            <>
+              <Link to="/dashboard" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Dashboard</Link>
+              <Link to="/playground" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Playground</Link>
+            </>
           )}
         </nav>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-5">
           {user ? (
             <>
               <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
-              <Button variant="ghost" size="sm" onClick={signOut}>
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <button
+                onClick={signOut}
+                className="cta-primary text-ink/70 hover:text-magenta"
+              >
+                Sign out
+              </button>
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/login">Sign in</Link>
-              </Button>
-              <Button variant="default" size="sm" asChild>
-                <Link to="/register">Get started</Link>
-              </Button>
+              <Link to="/login" className="text-[13px] text-ink/70 hover:text-ink">
+                Sign in
+              </Link>
+              <Link
+                to="/register"
+                className="cta-primary inline-flex items-center bg-ink px-5 py-2.5 text-paper hover:bg-magenta transition-colors"
+              >
+                Get started
+              </Link>
             </>
           )}
         </div>
