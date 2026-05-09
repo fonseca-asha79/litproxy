@@ -14,7 +14,152 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lightning_keys: {
+        Row: {
+          api_key: string
+          created_at: string
+          failure_count: number
+          id: string
+          is_active: boolean
+          label: string
+          last_error: string | null
+          last_used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          api_key: string
+          created_at?: string
+          failure_count?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_error?: string | null
+          last_used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          api_key?: string
+          created_at?: string
+          failure_count?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_error?: string | null
+          last_used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          email: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          email?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      request_logs: {
+        Row: {
+          attempt_details: Json | null
+          attempts: number | null
+          completion_tokens: number | null
+          cost_usd: number | null
+          created_at: string
+          error_message: string | null
+          http_status: number | null
+          id: string
+          latency_ms: number | null
+          lightning_key_id: string | null
+          lightning_key_label: string | null
+          model_requested: string | null
+          model_used: string | null
+          prompt_tokens: number | null
+          status: string
+          total_tokens: number | null
+          user_id: string
+        }
+        Insert: {
+          attempt_details?: Json | null
+          attempts?: number | null
+          completion_tokens?: number | null
+          cost_usd?: number | null
+          created_at?: string
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          latency_ms?: number | null
+          lightning_key_id?: string | null
+          lightning_key_label?: string | null
+          model_requested?: string | null
+          model_used?: string | null
+          prompt_tokens?: number | null
+          status: string
+          total_tokens?: number | null
+          user_id: string
+        }
+        Update: {
+          attempt_details?: Json | null
+          attempts?: number | null
+          completion_tokens?: number | null
+          cost_usd?: number | null
+          created_at?: string
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          latency_ms?: number | null
+          lightning_key_id?: string | null
+          lightning_key_label?: string | null
+          model_requested?: string | null
+          model_used?: string | null
+          prompt_tokens?: number | null
+          status?: string
+          total_tokens?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "request_logs_lightning_key_id_fkey"
+            columns: ["lightning_key_id"]
+            isOneToOne: false
+            referencedRelation: "lightning_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_settings: {
+        Row: {
+          created_at: string
+          default_model: string
+          proxy_api_key: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_model?: string
+          proxy_api_key?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_model?: string
+          proxy_api_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
