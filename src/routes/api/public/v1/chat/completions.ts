@@ -47,7 +47,9 @@ async function handle(request: Request) {
   }
 
   const requestedModel: string | null = body?.model || null;
-  const modelToUse = requestedModel && requestedModel !== "" ? requestedModel : settings.default_model;
+  const isDefaultAlias =
+    !requestedModel || ["default", "none", "auto"].includes(String(requestedModel).trim().toLowerCase());
+  const modelToUse = isDefaultAlias ? settings.default_model : requestedModel!;
   body.model = modelToUse;
   const isStream = !!body?.stream;
 
