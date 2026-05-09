@@ -239,7 +239,7 @@ export const Route = createFileRoute("/api/public/v1/chat/completions")({
           headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Lightning-Key-Id",
           },
         }),
       POST: async ({ request }) => handle(request),
