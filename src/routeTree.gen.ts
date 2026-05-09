@@ -9,10 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ModelsRouteImport } from './routes/models'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicV1ModelsRouteImport } from './routes/api/public/v1/models'
 import { Route as ApiPublicV1ChatCompletionsRouteImport } from './routes/api/public/v1/chat/completions'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelsRoute = ModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -32,40 +50,88 @@ const ApiPublicV1ChatCompletionsRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/models': typeof ModelsRoute
+  '/register': typeof RegisterRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/models': typeof ModelsRoute
+  '/register': typeof RegisterRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/models': typeof ModelsRoute
+  '/register': typeof RegisterRoute
   '/api/public/v1/models': typeof ApiPublicV1ModelsRoute
   '/api/public/v1/chat/completions': typeof ApiPublicV1ChatCompletionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/v1/models' | '/api/public/v1/chat/completions'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/models'
+    | '/register'
+    | '/api/public/v1/models'
+    | '/api/public/v1/chat/completions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/v1/models' | '/api/public/v1/chat/completions'
+  to:
+    | '/'
+    | '/login'
+    | '/models'
+    | '/register'
+    | '/api/public/v1/models'
+    | '/api/public/v1/chat/completions'
   id:
     | '__root__'
     | '/'
+    | '/login'
+    | '/models'
+    | '/register'
     | '/api/public/v1/models'
     | '/api/public/v1/chat/completions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  ModelsRoute: typeof ModelsRoute
+  RegisterRoute: typeof RegisterRoute
   ApiPublicV1ModelsRoute: typeof ApiPublicV1ModelsRoute
   ApiPublicV1ChatCompletionsRoute: typeof ApiPublicV1ChatCompletionsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models': {
+      id: '/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -92,9 +158,22 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  ModelsRoute: ModelsRoute,
+  RegisterRoute: RegisterRoute,
   ApiPublicV1ModelsRoute: ApiPublicV1ModelsRoute,
   ApiPublicV1ChatCompletionsRoute: ApiPublicV1ChatCompletionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
