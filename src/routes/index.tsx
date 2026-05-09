@@ -36,10 +36,10 @@ function Home() {
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
         <div
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[600px] opacity-40"
+          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[600px] opacity-50"
           style={{
             background:
-              "radial-gradient(ellipse 60% 40% at 50% 10%, oklch(0.72 0.22 295 / 0.5), transparent 70%)",
+              "radial-gradient(ellipse 60% 40% at 50% 10%, oklch(0.80 0.17 75 / 0.45), transparent 70%)",
           }}
         />
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-16 text-center sm:pt-32">
