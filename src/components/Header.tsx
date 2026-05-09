@@ -12,50 +12,65 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link to="/" className="flex items-baseline gap-2">
-          <span className="font-serif-italic text-2xl leading-none">Litproxy</span>
-          <span className="h-1.5 w-1.5 rounded-full bg-magenta" />
+    <header className="sticky top-0 z-40 w-full border-b border-hairline bg-background/70 backdrop-blur-xl">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+        <Link to="/" className="flex items-center gap-2">
+          <span className="grid h-6 w-6 place-items-center rounded-md bg-brand text-[12px] font-bold text-primary-foreground">
+            ⌁
+          </span>
+          <span className="text-[15px] font-semibold tracking-tight">litproxy</span>
         </Link>
 
-        <nav className="hidden items-center gap-9 text-[13px] md:flex">
-          <Link to="/" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Home</Link>
-          <Link to="/models" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Models</Link>
+        <nav className="hidden items-center gap-1 text-[13px] md:flex">
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/models">Models</NavLink>
           {user && (
             <>
-              <Link to="/dashboard" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Dashboard</Link>
-              <Link to="/playground" className="text-ink/70 hover:text-ink" activeProps={{ className: "text-ink" }}>Playground</Link>
+              <NavLink to="/dashboard">Dashboard</NavLink>
+              <NavLink to="/playground">Playground</NavLink>
             </>
           )}
         </nav>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-3">
           {user ? (
             <>
               <span className="hidden text-xs text-muted-foreground sm:inline">{user.email}</span>
               <button
                 onClick={signOut}
-                className="cta-primary text-ink/70 hover:text-magenta"
+                className="rounded-md border border-hairline px-3 py-1.5 text-[12px] text-foreground/80 transition-colors hover:border-foreground/40 hover:text-foreground"
               >
                 Sign out
               </button>
             </>
           ) : (
             <>
-              <Link to="/login" className="text-[13px] text-ink/70 hover:text-ink">
+              <Link to="/login" className="text-[13px] text-foreground/70 hover:text-foreground">
                 Sign in
               </Link>
               <Link
                 to="/register"
-                className="cta-primary inline-flex items-center bg-ink px-5 py-2.5 text-paper hover:bg-magenta transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3.5 py-1.5 text-[12.5px] font-medium text-primary-foreground transition-colors hover:bg-brand-deep"
               >
-                Get started
+                Get started <span aria-hidden>→</span>
               </Link>
             </>
           )}
         </div>
       </div>
     </header>
+  );
+}
+
+function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
+  return (
+    <Link
+      to={to}
+      className="rounded-md px-3 py-1.5 text-foreground/65 transition-colors hover:bg-surface hover:text-foreground"
+      activeProps={{ className: "text-foreground bg-surface" }}
+      activeOptions={{ exact: to === "/" }}
+    >
+      {children}
+    </Link>
   );
 }
