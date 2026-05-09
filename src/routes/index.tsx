@@ -1,156 +1,222 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Header } from "@/components/Header";
 import { MODELS } from "@/lib/models";
-import { Zap, Key, Shuffle, Activity, ArrowRight, Code2, ArrowDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "LitProxy — OpenAI-compatible gateway for Lightning AI" },
+      { title: "Litproxy — An editorial OpenAI-shaped gateway for Lightning AI" },
       {
         name: "description",
         content:
-          "Bring your Lightning AI keys, get an OpenAI-compatible endpoint with automatic key rotation, fallback, request logs and per-model cost tracking.",
+          "Bring your Lightning AI keys. Get one OpenAI-compatible endpoint with key rotation, fallback, request logs and per-model cost tracking.",
       },
-      { property: "og:title", content: "LitProxy — OpenAI-compatible gateway for Lightning AI" },
-      { property: "og:description", content: "Multi-key rotation, fallback, logs and cost tracking on top of Lightning AI." },
+      { property: "og:title", content: "Litproxy — Editorial gateway for Lightning AI" },
+      { property: "og:description", content: "Multi-key rotation, fallback, logs and cost tracking." },
     ],
   }),
   component: Home,
 });
 
 function Home() {
-  const featured = MODELS.slice(0, 8);
   const [origin, setOrigin] = useState("https://your-app.lovable.app");
-  useEffect(() => {
-    setOrigin(window.location.origin);
-  }, []);
+  useEffect(() => setOrigin(window.location.origin), []);
+
+  const featured = MODELS.slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-ink">
       <Header />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-hero pointer-events-none" />
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[600px] opacity-50"
-          style={{
-            background:
-              "radial-gradient(ellipse 60% 40% at 50% 10%, oklch(0.80 0.17 75 / 0.45), transparent 70%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-16 text-center sm:pt-32">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/5 px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-primary backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            OpenAI-compatible gateway
-          </div>
-          <h1 className="mt-8 text-5xl font-semibold leading-[1.05] tracking-tight sm:text-7xl">
-            One endpoint. <br />
-            <span className="bg-gradient-primary bg-clip-text text-transparent">All your keys.</span>
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Bring multiple Lightning AI keys. Pick a default model. We rotate keys, fall back on
-            errors, and log every token, latency and cent — behind one OpenAI-shaped URL.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button
-              size="lg"
-              asChild
-              className="h-12 rounded-full bg-primary px-7 text-base font-medium text-primary-foreground shadow-glow hover:bg-primary/90"
-            >
-              <Link to="/register">
-                Launch your endpoint <ArrowRight className="ml-1 h-4 w-4" />
+      {/* HERO ─────────────────────────────────────────────── */}
+      <section className="border-b border-border">
+        <div className="mx-auto grid max-w-6xl gap-16 px-6 pt-24 pb-28 md:grid-cols-12 md:pt-32 md:pb-36">
+          <div className="md:col-span-7">
+            <div className="eyebrow flex items-center gap-3">
+              <span className="h-px w-8 bg-ash" />
+              Issue Nº 01 — Gateway
+            </div>
+
+            <h1 className="mt-8 font-serif-italic text-[clamp(3rem,9vw,6.5rem)] leading-[0.95] tracking-tight">
+              One endpoint.
+              <br />
+              <span className="not-italic font-normal">All your</span>{" "}
+              <span className="text-magenta">keys.</span>
+            </h1>
+
+            <p className="mt-10 max-w-xl font-display text-2xl italic font-light leading-tight text-ink/80">
+              An OpenAI-shaped proxy for Lightning AI. Quietly rotates keys, falls back on
+              failure, logs every cent.
+            </p>
+
+            <div className="mt-12 flex flex-wrap items-center gap-8">
+              <Link
+                to="/register"
+                className="cta-primary group inline-flex items-center gap-3 bg-ink px-10 py-4 text-paper transition-colors hover:bg-magenta"
+              >
+                Get started
+                <span className="h-px w-6 bg-paper transition-all group-hover:w-10" />
               </Link>
-            </Button>
-            <a href="#how" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
-              See how it works <ArrowDown className="h-4 w-4" />
-            </a>
+              <Link to="/models" className="text-[13px] text-ink/70 underline-offset-4 hover:text-magenta hover:underline">
+                Browse {MODELS.length} models →
+              </Link>
+            </div>
           </div>
 
-          {/* Terminal */}
-          <div className="mx-auto mt-16 max-w-2xl rounded-xl border border-border/60 bg-card/70 text-left shadow-elegant backdrop-blur">
-            <div className="flex items-center gap-2 border-b border-border/60 px-4 py-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
-              <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-              <span className="ml-3 font-mono text-xs text-muted-foreground">~/litproxy/example.py</span>
+          {/* Side note in italic */}
+          <aside className="md:col-span-5 md:pt-32">
+            <div className="border-l border-border pl-6">
+              <p className="eyebrow">A note from the editor</p>
+              <p className="mt-4 font-display text-lg italic leading-relaxed text-ink/75">
+                We resisted the dark-mode-with-purple-gradients aesthetic. What you get instead
+                is a tool that reads like a printed publication — slow on the eye, fast in the
+                hand.
+              </p>
+              <p className="mt-6 font-mono text-[11px] tracking-wider text-ash">— L.P.</p>
             </div>
-            <pre className="overflow-x-auto p-5 font-mono text-xs leading-relaxed">
-<span className="text-muted-foreground"># Drop-in OpenAI client</span>{"\n"}
-<span className="text-primary">from</span> openai <span className="text-primary">import</span> OpenAI{"\n\n"}
-client = <span className="text-primary">OpenAI</span>({"\n"}
-{"  "}base_url=<span className="text-success">"{origin}/api/public/v1"</span>,{"\n"}
-{"  "}api_key=<span className="text-success">"lvp_your_proxy_key"</span>,{"\n"}
+          </aside>
+        </div>
+      </section>
+
+      {/* CODE EXAMPLE ─────────────────────────────────────── */}
+      <section className="border-b border-border bg-paper">
+        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-24 md:grid-cols-12">
+          <div className="md:col-span-4">
+            <p className="eyebrow">Chapter I</p>
+            <h2 className="mt-4 font-serif-italic text-5xl leading-none">
+              A drop-in
+              <br />
+              replacement.
+            </h2>
+            <p className="mt-6 max-w-xs text-[15px] leading-relaxed text-ink/70">
+              Point any OpenAI client at one URL. Use <code className="font-mono text-[13px] text-magenta">model="default"</code>{" "}
+              to fall back to your dashboard preference.
+            </p>
+          </div>
+
+          <div className="md:col-span-8">
+            <div className="border border-border bg-background">
+              <div className="flex items-center justify-between border-b border-border px-5 py-3">
+                <span className="font-mono text-[11px] tracking-wider text-ash uppercase">
+                  example.py
+                </span>
+                <span className="font-mono text-[11px] text-ash">python · openai-sdk</span>
+              </div>
+              <pre className="overflow-x-auto p-6 font-mono text-[13px] leading-7 text-ink">
+<span className="text-ash"># A printed example, faithfully set.</span>{"\n"}
+<span className="text-magenta">from</span> openai <span className="text-magenta">import</span> OpenAI{"\n\n"}
+client = <span className="text-ink">OpenAI</span>({"\n"}
+{"    "}base_url=<span className="text-magenta">"{origin}/api/public/v1"</span>,{"\n"}
+{"    "}api_key=<span className="text-magenta">"lvp_your_proxy_key"</span>,{"\n"}
 ){"\n\n"}
-<span className="text-muted-foreground"># model="default" → uses your dashboard default</span>{"\n"}
-resp = client.chat.completions.<span className="text-primary">create</span>({"\n"}
-{"  "}model=<span className="text-success">"default"</span>,{"\n"}
-{"  "}messages=[{"{"}<span className="text-success">"role"</span>: <span className="text-success">"user"</span>, <span className="text-success">"content"</span>: <span className="text-success">"Hi!"</span>{"}"}],{"\n"}
+resp = client.chat.completions.<span className="text-ink">create</span>({"\n"}
+{"    "}model=<span className="text-magenta">"default"</span>,{"\n"}
+{"    "}messages=[{"{"}<span className="text-magenta">"role"</span>: <span className="text-magenta">"user"</span>,{"\n"}
+{"                "}<span className="text-magenta">"content"</span>: <span className="text-magenta">"Hello."</span>{"}"}],{"\n"}
 )
-            </pre>
+              </pre>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section id="how" className="mx-auto max-w-6xl px-6 py-24">
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">Everything in one place</h2>
-          <p className="mt-2 text-muted-foreground">From key to response, all observed.</p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { icon: Key, title: "Bring your keys", desc: "Add as many Lightning AI keys as you want — labelled and toggleable." },
-            { icon: Shuffle, title: "Auto rotation", desc: "Keys rotate by least-recent-use to spread load evenly." },
-            { icon: Zap, title: "Smart fallback", desc: "If one key fails we transparently retry on the next." },
-            { icon: Activity, title: "Cost & logs", desc: "Per-request tokens, latency, errors and USD cost." },
-          ].map((f) => (
-            <div
-              key={f.title}
-              className="group rounded-2xl border border-border/60 bg-card/40 p-6 backdrop-blur transition hover:border-primary/50 hover:shadow-glow"
-            >
-              <div className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
-                <f.icon className="h-5 w-5" />
-              </div>
-              <h3 className="mt-4 font-semibold">{f.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{f.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* PRINCIPLES ──────────────────────────────────────── */}
+      <section className="border-b border-border">
+        <div className="mx-auto max-w-6xl px-6 py-28">
+          <p className="eyebrow">Chapter II — Principles</p>
+          <h2 className="mt-4 font-serif-italic text-6xl leading-none">
+            Considered, not <span className="not-italic font-normal">noisy.</span>
+          </h2>
 
-      {/* Featured models */}
-      <section className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Featured models</h2>
-            <p className="text-sm text-muted-foreground">USD per 1M tokens (input / output)</p>
+          <div className="mt-16 grid gap-px bg-border md:grid-cols-2">
+            {[
+              {
+                n: "01",
+                t: "Bring your keys",
+                d: "Add as many Lightning AI keys as you like. Label them. Pause them. Rotate them.",
+              },
+              {
+                n: "02",
+                t: "Least-recent rotation",
+                d: "Each request picks the key idle the longest. Load is spread without ceremony.",
+              },
+              {
+                n: "03",
+                t: "Quiet fallback",
+                d: "If a key returns an error, the next one is tried. The caller never notices.",
+              },
+              {
+                n: "04",
+                t: "An honest ledger",
+                d: "Every request keeps tokens, latency, error and USD cost. Visible in your dashboard.",
+              },
+            ].map((f) => (
+              <div key={f.n} className="bg-background p-10">
+                <div className="flex items-baseline gap-6">
+                  <span className="font-serif-italic text-3xl text-magenta">{f.n}</span>
+                  <h3 className="font-display text-2xl italic">{f.t}</h3>
+                </div>
+                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-ink/70">{f.d}</p>
+              </div>
+            ))}
           </div>
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/models">All {MODELS.length} <ArrowRight className="ml-1 h-3 w-3" /></Link>
-          </Button>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {featured.map((m) => (
-            <div key={m.id} className="rounded-xl border border-border/60 bg-card/40 p-4 transition hover:border-primary/40">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">{m.provider}</div>
-              <div className="mt-1 font-medium">{m.name}</div>
-              <div className="mt-3 flex items-baseline gap-1 text-sm">
-                <span className="text-primary">${m.inputPrice}</span>
-                <span className="text-muted-foreground">/</span>
-                <span className="text-primary">${m.outputPrice}</span>
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground">{m.context} ctx</div>
-            </div>
-          ))}
         </div>
       </section>
 
-      <footer className="border-t border-border/50 py-8 text-center text-xs text-muted-foreground">
-        Built on top of <a className="text-primary hover:underline" href="https://lightning.ai/models" target="_blank" rel="noreferrer">Lightning AI</a>.
+      {/* FEATURED MODELS ─────────────────────────────────── */}
+      <section className="bg-paper">
+        <div className="mx-auto max-w-6xl px-6 py-28">
+          <div className="flex items-end justify-between border-b border-border pb-6">
+            <div>
+              <p className="eyebrow">Chapter III</p>
+              <h2 className="mt-3 font-serif-italic text-5xl leading-none">From the catalogue.</h2>
+            </div>
+            <Link to="/models" className="cta-primary text-ink/70 hover:text-magenta">
+              View all {MODELS.length}
+              <ArrowRight className="ml-2 inline h-3 w-3" />
+            </Link>
+          </div>
+
+          <ul className="mt-2 divide-y divide-border">
+            {featured.map((m, i) => (
+              <li key={m.id} className="grid grid-cols-12 items-baseline gap-4 py-6 transition-colors hover:bg-background">
+                <span className="col-span-1 font-mono text-[11px] text-ash">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="col-span-11 md:col-span-5">
+                  <div className="font-display text-2xl italic">{m.name}</div>
+                  <div className="font-mono text-[11px] uppercase tracking-wider text-ash">
+                    {m.provider}
+                  </div>
+                </div>
+                <div className="col-span-6 hidden font-mono text-[12px] text-ink/60 md:block">
+                  {m.id}
+                </div>
+                <div className="col-span-12 mt-2 flex items-baseline justify-end gap-6 md:col-span-12 md:mt-0 md:contents">
+                  <span className="text-[13px] text-ash">in</span>
+                  <span className="font-display text-xl italic text-magenta">${m.inputPrice}</span>
+                  <span className="text-[13px] text-ash">out</span>
+                  <span className="font-display text-xl italic text-magenta">${m.outputPrice}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      {/* COLOPHON ────────────────────────────────────────── */}
+      <footer className="border-t border-border">
+        <div className="mx-auto flex max-w-6xl flex-col items-baseline justify-between gap-6 px-6 py-10 md:flex-row">
+          <p className="font-display text-lg italic">
+            Litproxy <span className="text-ash">— a quiet gateway for noisy infrastructure.</span>
+          </p>
+          <p className="font-mono text-[11px] uppercase tracking-wider text-ash">
+            Set in Cormorant Garamond &amp; Instrument Sans · ©{" "}
+            {new Date().getFullYear()}
+          </p>
+        </div>
       </footer>
     </div>
   );
