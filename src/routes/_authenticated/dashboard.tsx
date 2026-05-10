@@ -174,13 +174,16 @@ function Dashboard() {
 
       <div className="mx-auto max-w-6xl px-6 py-10">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-8 grid w-full grid-cols-3 sm:w-auto sm:inline-flex">
+          <TabsList className="mb-8 grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
             <TabsTrigger value="overview" className="gap-1.5">
               <SettingsIcon className="h-3.5 w-3.5" /> Overview
             </TabsTrigger>
             <TabsTrigger value="keys" className="gap-1.5">
               <KeyRound className="h-3.5 w-3.5" /> Keys
               <span className="ml-0.5 rounded bg-foreground/10 px-1 font-mono text-[10px]">{keys.length}</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-1.5">
+              <BarChart3 className="h-3.5 w-3.5" /> Analytics
             </TabsTrigger>
             <TabsTrigger value="logs" className="gap-1.5">
               <Activity className="h-3.5 w-3.5" /> Logs
