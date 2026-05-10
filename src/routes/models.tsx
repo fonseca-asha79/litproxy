@@ -100,6 +100,20 @@ function ModelsPage() {
                 </button>
               ))}
             </div>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="rounded-md border border-hairline bg-surface/60 px-3 py-1.5 text-[12px] focus:border-brand focus:outline-none"
+            >
+              <option value="default">Sort: Default</option>
+              <option value="price-asc">Input price: low → high</option>
+              <option value="price-desc">Input price: high → low</option>
+              <option value="out-asc">Output price: low → high</option>
+              <option value="out-desc">Output price: high → low</option>
+              <option value="context">Context: largest first</option>
+              <option value="name">Name (A–Z)</option>
+              <option value="provider">Provider</option>
+            </select>
           </div>
         </div>
       </section>
