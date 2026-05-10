@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
 import { toast } from "sonner";
-import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon } from "lucide-react";
+import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
