@@ -223,12 +223,9 @@ function Dashboard() {
                 </Field>
               </div>
 
-              <pre className="mt-5 overflow-x-auto rounded-lg border border-hairline bg-background p-4 font-mono text-[11.5px] leading-6 text-foreground/85">
-{`curl ${endpoint}/chat/completions \\
-  -H "Authorization: Bearer ${settings?.proxy_api_key || "<your_key>"}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model": "default", "messages":[{"role":"user","content":"Hi"}]}'`}
-              </pre>
+              <div className="mt-5">
+                <CodeTabs snippets={buildRequestSnippets(`${endpoint}`, settings?.proxy_api_key || "<your_key>", "default")} />
+              </div>
             </Card>
 
             <ModelPicker
