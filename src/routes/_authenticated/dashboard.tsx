@@ -5,9 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
 import { toast } from "sonner";
-import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search } from "lucide-react";
+import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search, BarChart3 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { CodeTabs, buildRequestSnippets } from "@/components/CodeBlock";
+import { Analytics } from "@/components/Analytics";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Litproxy" }] }),
@@ -33,6 +35,7 @@ interface LogRow {
   id: string;
   model_requested: string | null;
   model_used: string | null;
+  lightning_key_id: string | null;
   lightning_key_label: string | null;
   status: string;
   http_status: number | null;
@@ -62,7 +65,7 @@ function Dashboard() {
     const [s, k, l] = await Promise.all([
       supabase.from("user_settings").select("*").maybeSingle(),
       supabase.from("lightning_keys").select("*").order("created_at", { ascending: false }),
-      supabase.from("request_logs").select("*").order("created_at", { ascending: false }).limit(50),
+      supabase.from("request_logs").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
     if (s.data) setSettings(s.data as Settings);
     if (k.data) setKeys(k.data as LightningKey[]);
@@ -172,13 +175,16 @@ function Dashboard() {
 
       <div className="mx-auto max-w-6xl px-6 py-10">
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-8 grid w-full grid-cols-3 sm:w-auto sm:inline-flex">
+          <TabsList className="mb-8 grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
             <TabsTrigger value="overview" className="gap-1.5">
               <SettingsIcon className="h-3.5 w-3.5" /> Overview
             </TabsTrigger>
             <TabsTrigger value="keys" className="gap-1.5">
               <KeyRound className="h-3.5 w-3.5" /> Keys
               <span className="ml-0.5 rounded bg-foreground/10 px-1 font-mono text-[10px]">{keys.length}</span>
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-1.5">
+              <BarChart3 className="h-3.5 w-3.5" /> Analytics
             </TabsTrigger>
             <TabsTrigger value="logs" className="gap-1.5">
               <Activity className="h-3.5 w-3.5" /> Logs
@@ -218,12 +224,9 @@ function Dashboard() {
                 </Field>
               </div>
 
-              <pre className="mt-5 overflow-x-auto rounded-lg border border-hairline bg-background p-4 font-mono text-[11.5px] leading-6 text-foreground/85">
-{`curl ${endpoint}/chat/completions \\
-  -H "Authorization: Bearer ${settings?.proxy_api_key || "<your_key>"}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model": "default", "messages":[{"role":"user","content":"Hi"}]}'`}
-              </pre>
+              <div className="mt-5">
+                <CodeTabs snippets={buildRequestSnippets(`${endpoint}`, settings?.proxy_api_key || "<your_key>", "default")} />
+              </div>
             </Card>
 
             <ModelPicker
@@ -311,11 +314,16 @@ function Dashboard() {
             </Card>
           </TabsContent>
 
+          {/* ============ ANALYTICS ============ */}
+          <TabsContent value="analytics" className="mt-0">
+            <Analytics logs={logs} keys={keys.map((k) => ({ id: k.id, label: k.label }))} />
+          </TabsContent>
+
           {/* ============ LOGS ============ */}
           <TabsContent value="logs" className="mt-0">
             <Card
               title="Recent requests"
-              desc="Last 50 calls — tokens, latency, cost."
+              desc="Last 1000 calls — tokens, latency, cost."
               action={
                 <button onClick={refresh} className="inline-flex items-center gap-1.5 text-[12px] text-foreground/60 hover:text-foreground">
                   <RefreshCw className="h-3 w-3" /> Refresh

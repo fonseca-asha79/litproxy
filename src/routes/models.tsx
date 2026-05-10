@@ -22,6 +22,7 @@ export const Route = createFileRoute("/models")({
 function ModelsPage() {
   const [q, setQ] = useState("");
   const [provider, setProvider] = useState<string>("all");
+  const [sort, setSort] = useState<string>("default");
 
   const providers = useMemo(() => {
     const set = new Set(MODELS.map((m) => m.provider));
@@ -30,7 +31,7 @@ function ModelsPage() {
 
   const filtered = useMemo(() => {
     const s = q.trim().toLowerCase();
-    return MODELS.filter((m) => {
+    const arr = MODELS.filter((m) => {
       if (provider !== "all" && m.provider !== provider) return false;
       if (!s) return true;
       return (
@@ -39,7 +40,21 @@ function ModelsPage() {
         m.provider.toLowerCase().includes(s)
       );
     });
-  }, [q, provider]);
+    const ctxNum = (c: string) => {
+      const n = parseFloat(c);
+      return c.toUpperCase().includes("M") ? n * 1000 : n;
+    };
+    switch (sort) {
+      case "price-asc":  return [...arr].sort((a, b) => a.inputPrice - b.inputPrice);
+      case "price-desc": return [...arr].sort((a, b) => b.inputPrice - a.inputPrice);
+      case "out-asc":    return [...arr].sort((a, b) => a.outputPrice - b.outputPrice);
+      case "out-desc":   return [...arr].sort((a, b) => b.outputPrice - a.outputPrice);
+      case "name":       return [...arr].sort((a, b) => a.name.localeCompare(b.name));
+      case "context":    return [...arr].sort((a, b) => ctxNum(b.context) - ctxNum(a.context));
+      case "provider":   return [...arr].sort((a, b) => a.provider.localeCompare(b.provider) || a.name.localeCompare(b.name));
+      default:           return arr;
+    }
+  }, [q, provider, sort]);
 
   const copy = (id: string) => {
     navigator.clipboard.writeText(id);
@@ -85,6 +100,20 @@ function ModelsPage() {
                 </button>
               ))}
             </div>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="rounded-md border border-hairline bg-surface/60 px-3 py-1.5 text-[12px] focus:border-brand focus:outline-none"
+            >
+              <option value="default">Sort: Default</option>
+              <option value="price-asc">Input price: low → high</option>
+              <option value="price-desc">Input price: high → low</option>
+              <option value="out-asc">Output price: low → high</option>
+              <option value="out-desc">Output price: high → low</option>
+              <option value="context">Context: largest first</option>
+              <option value="name">Name (A–Z)</option>
+              <option value="provider">Provider</option>
+            </select>
           </div>
         </div>
       </section>
