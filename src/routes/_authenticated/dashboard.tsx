@@ -35,6 +35,7 @@ interface LogRow {
   id: string;
   model_requested: string | null;
   model_used: string | null;
+  lightning_key_id: string | null;
   lightning_key_label: string | null;
   status: string;
   http_status: number | null;
