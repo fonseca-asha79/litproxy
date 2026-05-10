@@ -313,11 +313,16 @@ function Dashboard() {
             </Card>
           </TabsContent>
 
+          {/* ============ ANALYTICS ============ */}
+          <TabsContent value="analytics" className="mt-0">
+            <Analytics logs={logs} keys={keys.map((k) => ({ id: k.id, label: k.label }))} />
+          </TabsContent>
+
           {/* ============ LOGS ============ */}
           <TabsContent value="logs" className="mt-0">
             <Card
               title="Recent requests"
-              desc="Last 50 calls — tokens, latency, cost."
+              desc="Last 1000 calls — tokens, latency, cost."
               action={
                 <button onClick={refresh} className="inline-flex items-center gap-1.5 text-[12px] text-foreground/60 hover:text-foreground">
                   <RefreshCw className="h-3 w-3" /> Refresh
