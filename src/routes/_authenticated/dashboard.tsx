@@ -226,32 +226,11 @@ function Dashboard() {
               </pre>
             </Card>
 
-            <Card title="Default model" desc='Sent when a request omits "model" or sends "default" / "none" / "auto".'>
-              {defaultModelInfo && (
-                <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border border-hairline bg-background px-4 py-3 text-[13px]">
-                  <span className="font-medium">{defaultModelInfo.name}</span>
-                  <span className="font-mono text-[11px] text-muted-foreground">{defaultModelInfo.id}</span>
-                  <span className="ml-auto font-mono text-[11px] text-foreground/60">
-                    ${defaultModelInfo.inputPrice}/${defaultModelInfo.outputPrice} per 1M · {defaultModelInfo.context}
-                  </span>
-                </div>
-              )}
-              <select
-                value={settings?.default_model || ""}
-                onChange={(e) => updateModel(e.target.value)}
-                className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[14px] focus:border-brand focus:outline-none"
-              >
-                {Object.entries(groupedModels).map(([prov, models]) => (
-                  <optgroup key={prov} label={prov}>
-                    {models.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name} — ${m.inputPrice}/${m.outputPrice} per 1M
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </Card>
+            <ModelPicker
+              value={settings?.default_model || ""}
+              onChange={updateModel}
+              info={defaultModelInfo}
+            />
           </TabsContent>
 
           {/* ============ KEYS ============ */}
