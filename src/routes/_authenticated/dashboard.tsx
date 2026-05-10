@@ -64,7 +64,7 @@ function Dashboard() {
     const [s, k, l] = await Promise.all([
       supabase.from("user_settings").select("*").maybeSingle(),
       supabase.from("lightning_keys").select("*").order("created_at", { ascending: false }),
-      supabase.from("request_logs").select("*").order("created_at", { ascending: false }).limit(50),
+      supabase.from("request_logs").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
     if (s.data) setSettings(s.data as Settings);
     if (k.data) setKeys(k.data as LightningKey[]);
