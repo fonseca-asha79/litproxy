@@ -443,3 +443,122 @@ function IconBtn({
     </button>
   );
 }
+
+function ModelPicker({
+  value,
+  onChange,
+  info,
+}: {
+  value: string;
+  onChange: (id: string) => void;
+  info: (typeof MODELS)[number] | null | undefined;
+}) {
+  const [q, setQ] = useState("");
+  const [provider, setProvider] = useState<string>("all");
+  const providers = useMemo(() => ["all", ...Array.from(new Set(MODELS.map((m) => m.provider)))], []);
+  const filtered = useMemo(() => {
+    const s = q.trim().toLowerCase();
+    return MODELS.filter((m) => {
+      if (provider !== "all" && m.provider !== provider) return false;
+      if (!s) return true;
+      return m.name.toLowerCase().includes(s) || m.id.toLowerCase().includes(s);
+    });
+  }, [q, provider]);
+
+  return (
+    <section className="rounded-2xl border border-hairline bg-surface/40 p-6 md:p-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h2 className="text-[18px] font-semibold tracking-tight">Default model</h2>
+          <p className="mt-1 text-[13px] text-foreground/60">
+            Used when requests send <code className="font-mono text-[12px] text-foreground/80">"default"</code>,{" "}
+            <code className="font-mono text-[12px] text-foreground/80">"none"</code>, <code className="font-mono text-[12px] text-foreground/80">"auto"</code>, or omit the model field.
+          </p>
+        </div>
+        {info && (
+          <div className="rounded-xl border border-brand/30 bg-brand/5 px-4 py-2.5 text-right">
+            <div className="font-mono text-[10px] uppercase tracking-wider text-brand/80">Currently active</div>
+            <div className="mt-0.5 text-[14px] font-semibold">{info.name}</div>
+            <div className="font-mono text-[10.5px] text-foreground/55">
+              ${info.inputPrice} in · ${info.outputPrice} out · {info.context}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        <div className="relative min-w-[220px] flex-1">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            placeholder="Search models…"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="w-full rounded-md border border-hairline bg-background py-2 pl-9 pr-3 text-[13px] placeholder:text-muted-foreground focus:border-brand focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {providers.map((p) => (
+            <button
+              key={p}
+              onClick={() => setProvider(p)}
+              className={
+                "rounded-md border px-2.5 py-1.5 text-[11.5px] capitalize transition-colors " +
+                (provider === p
+                  ? "border-brand/40 bg-brand/10 text-brand"
+                  : "border-hairline bg-background text-foreground/65 hover:border-foreground/30 hover:text-foreground")
+              }
+            >
+              {p === "all" ? `All (${MODELS.length})` : p}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-5 grid max-h-[420px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+        {filtered.map((m) => {
+          const selected = m.id === value;
+          return (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => onChange(m.id)}
+              className={
+                "group relative flex flex-col rounded-xl border p-3.5 text-left transition-all " +
+                (selected
+                  ? "border-brand/50 bg-brand/[0.07] shadow-[0_0_0_1px_oklch(0.85_0.18_165/0.25)_inset]"
+                  : "border-hairline bg-background hover:border-foreground/30 hover:bg-surface")
+              }
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wider text-foreground/65">
+                  {m.provider}
+                </span>
+                {selected ? (
+                  <span className="grid h-4 w-4 place-items-center rounded-full bg-brand text-primary-foreground">
+                    <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                  </span>
+                ) : (
+                  <span className="font-mono text-[10px] text-muted-foreground">{m.context}</span>
+                )}
+              </div>
+              <div className="mt-2 text-[13.5px] font-semibold leading-tight">{m.name}</div>
+              <div className="mt-3 flex items-baseline justify-between border-t border-hairline pt-2.5 font-mono text-[10.5px]">
+                <span className="text-muted-foreground">
+                  in <span className="text-foreground/85">${m.inputPrice}</span>
+                </span>
+                <span className="text-muted-foreground">
+                  out <span className="text-foreground/85">${m.outputPrice}</span>
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {filtered.length === 0 && (
+        <p className="mt-4 rounded-lg border border-dashed border-hairline px-4 py-8 text-center text-[13px] text-muted-foreground">
+          No models match "{q}".
+        </p>
+      )}
+    </section>
+  );
+}
