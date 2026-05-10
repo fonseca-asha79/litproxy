@@ -15,6 +15,7 @@ function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -32,8 +33,12 @@ function RegisterPage() {
     });
     setLoading(false);
     if (error) return toast.error(error.message);
-    if (data.session) navigate({ to: "/dashboard" });
-    else toast.success("Account created. Signing you in…");
+    if (data.session) {
+      navigate({ to: "/dashboard" });
+    } else {
+      setSent(true);
+      toast.success("Check your email to verify your account.");
+    }
   };
 
   const google = async () => {
