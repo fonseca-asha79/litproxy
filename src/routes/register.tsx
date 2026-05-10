@@ -50,6 +50,26 @@ function RegisterPage() {
     navigate({ to: "/dashboard" });
   };
 
+  if (sent) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md items-center px-6 py-16">
+          <div className="w-full rounded-2xl border border-hairline bg-surface/70 p-8 text-center backdrop-blur">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand/15 text-brand">✉</div>
+            <h1 className="mt-5 text-2xl font-semibold tracking-tight">Check your email</h1>
+            <p className="mt-2 text-[13.5px] text-foreground/65">
+              We sent a verification link to <span className="font-mono text-foreground">{email}</span>. Click it to activate your account, then sign in.
+            </p>
+            <Link to="/login" className="mt-6 inline-block rounded-md border border-hairline px-4 py-2 text-[13px] hover:border-foreground/40">
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
