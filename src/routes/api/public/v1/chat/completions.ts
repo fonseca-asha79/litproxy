@@ -108,6 +108,7 @@ async function handle(request: Request) {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${key.api_key}`,
+          "User-Agent": upstreamUA,
         },
         body: JSON.stringify(body),
       });
