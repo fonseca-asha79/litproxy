@@ -436,27 +436,79 @@ function Dashboard() {
                 </div>
               }
             >
-              <form onSubmit={addKey} className="grid gap-2 md:grid-cols-[1fr_2fr_auto]">
-                <input
-                  placeholder="Label (e.g. personal)"
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
-                />
-                <input
-                  placeholder="Lightning AI API key"
-                  value={newKey}
-                  onChange={(e) => setNewKey(e.target.value)}
-                  className="rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12px] focus:border-brand focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={adding}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep disabled:opacity-60"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add
-                </button>
-              </form>
+              <div className="mb-3 inline-flex rounded-md border border-hairline bg-background p-0.5 text-[12px]">
+                {(["single", "bulk"] as const).map((m) => {
+                  const active = (m === "bulk") === bulkMode;
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setBulkMode(m === "bulk")}
+                      className={
+                        "rounded px-3 py-1 transition-colors " +
+                        (active
+                          ? "bg-surface-2 font-medium text-foreground"
+                          : "text-muted-foreground hover:text-foreground")
+                      }
+                    >
+                      {m === "single" ? "Single" : "Bulk"}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {!bulkMode ? (
+                <form onSubmit={addKey} className="grid gap-2 md:grid-cols-[1fr_2fr_auto]">
+                  <input
+                    placeholder="Label (e.g. personal)"
+                    value={newLabel}
+                    onChange={(e) => setNewLabel(e.target.value)}
+                    className="rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                  />
+                  <input
+                    placeholder="Lightning AI API key"
+                    value={newKey}
+                    onChange={(e) => setNewKey(e.target.value)}
+                    className="rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12px] focus:border-brand focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    disabled={adding}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep disabled:opacity-60"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={addBulkKeys} className="grid gap-2">
+                  <input
+                    placeholder="Optional label prefix (e.g. team) — auto-numbered"
+                    value={bulkPrefix}
+                    onChange={(e) => setBulkPrefix(e.target.value)}
+                    className="rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                  />
+                  <textarea
+                    placeholder={"Paste keys, one per line.\nOptional naming: label,key   (or just the key)"}
+                    value={bulkText}
+                    onChange={(e) => setBulkText(e.target.value)}
+                    rows={6}
+                    className="resize-y rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12px] focus:border-brand focus:outline-none"
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {bulkText.split(/\r?\n/).filter((l) => l.trim()).length} line
+                      {bulkText.split(/\r?\n/).filter((l) => l.trim()).length === 1 ? "" : "s"}
+                    </span>
+                    <button
+                      type="submit"
+                      disabled={adding}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep disabled:opacity-60"
+                    >
+                      <Plus className="h-3.5 w-3.5" /> Add all
+                    </button>
+                  </div>
+                </form>
+              )}
 
               <div className="mt-6 divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
                 {keys.length === 0 && (
