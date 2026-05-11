@@ -71,6 +71,42 @@ export type Database = {
         }
         Relationships: []
       }
+      proxy_keys: {
+        Row: {
+          allowed_models: string[]
+          api_key: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          rate_limit_per_min: number | null
+          user_id: string
+        }
+        Insert: {
+          allowed_models?: string[]
+          api_key: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          rate_limit_per_min?: number | null
+          user_id: string
+        }
+        Update: {
+          allowed_models?: string[]
+          api_key?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          rate_limit_per_min?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       request_logs: {
         Row: {
           attempt_details: Json | null
