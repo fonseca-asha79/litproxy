@@ -54,6 +54,7 @@ export function ModelPicker({
   placeholder = "Select a model…",
 }: Props) {
   const [open, setOpen] = React.useState(false);
+  const [filter, setFilter] = React.useState<Provider | "all">("all");
 
   const grouped = React.useMemo(() => {
     const map: Record<Provider, ModelInfo[]> = {
