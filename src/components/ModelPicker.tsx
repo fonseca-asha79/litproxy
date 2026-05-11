@@ -196,6 +196,7 @@ export function ModelPicker({
             {ORDER.map((prov, i) => {
               const items = grouped[prov];
               if (!items.length) return null;
+              if (filter !== "all" && filter !== prov) return null;
               return (
                 <React.Fragment key={prov}>
                   {i > 0 && <CommandSeparator />}
