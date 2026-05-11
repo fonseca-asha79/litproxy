@@ -42,7 +42,7 @@ interface Params {
 const defaultParams: Params = {
   model: "default",
   keyId: "auto",
-  stream: false,
+  stream: true,
   temperature: "0.7",
   max_tokens: "",
   top_p: "1",
