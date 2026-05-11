@@ -84,9 +84,12 @@ function Playground() {
     Promise.all([
       supabase.from("user_settings").select("*").maybeSingle(),
       supabase.from("lightning_keys").select("id, label, is_active").order("created_at", { ascending: false }),
-    ]).then(([s, k]) => {
+      supabase.from("proxy_keys").select("api_key, is_active").order("created_at", { ascending: true }),
+    ]).then(([s, k, p]) => {
       if (s.data) setSettings(s.data as Settings);
       if (k.data) setKeys((k.data as KeyRow[]).filter((x) => x.is_active));
+      const first = (p.data as { api_key: string; is_active: boolean }[] | null)?.find((r) => r.is_active);
+      if (first) setProxyKey(first.api_key);
     });
   }, [user]);
 
