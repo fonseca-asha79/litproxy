@@ -53,6 +53,21 @@ async function handle(request: Request) {
   body.model = modelToUse;
   const isStream = !!body?.stream;
 
+  // Capture caller UA so we can forward it upstream + log it for debugging WAF blocks.
+  const callerUA = request.headers.get("user-agent") || "";
+  const upstreamUA = callerUA || "OpenAI/Proxy (litproxy)";
+
+  // Snapshot body for logging (truncate huge messages so jsonb stays sane).
+  const loggedBody = (() => {
+    try {
+      const s = JSON.stringify(body);
+      if (s.length <= 20000) return body;
+      return { _truncated: true, _original_size: s.length, preview: s.slice(0, 20000) };
+    } catch {
+      return null;
+    }
+  })();
+
   // Optional: force a specific Lightning key (used by the playground).
   const forcedKeyId =
     request.headers.get("x-lightning-key-id") ||
@@ -78,6 +93,8 @@ async function handle(request: Request) {
       http_status: 400,
       error_message: "No active Lightning AI keys configured.",
       latency_ms: Date.now() - started,
+      request_body: loggedBody,
+      caller_user_agent: callerUA,
     });
     return jsonError(400, "No active Lightning AI keys configured. Add one in your dashboard.");
   }
@@ -93,6 +110,7 @@ async function handle(request: Request) {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${key.api_key}`,
+          "User-Agent": upstreamUA,
         },
         body: JSON.stringify(body),
       });
@@ -130,6 +148,8 @@ async function handle(request: Request) {
           latency_ms: Date.now() - started,
           attempts: attempts.length,
           attempt_details: attempts,
+          request_body: loggedBody,
+          caller_user_agent: callerUA,
         });
         return new Response(upstream.body, {
           status: 200,
@@ -163,6 +183,8 @@ async function handle(request: Request) {
         latency_ms: Date.now() - started,
         attempts: attempts.length,
         attempt_details: attempts,
+        request_body: loggedBody,
+        caller_user_agent: callerUA,
       });
 
       return new Response(JSON.stringify(json), {
@@ -201,6 +223,8 @@ async function handle(request: Request) {
     latency_ms: Date.now() - started,
     attempts: attempts.length,
     attempt_details: attempts,
+    request_body: loggedBody,
+    caller_user_agent: callerUA,
   });
 
   return new Response(

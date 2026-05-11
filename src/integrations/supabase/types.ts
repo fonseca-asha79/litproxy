@@ -75,6 +75,7 @@ export type Database = {
         Row: {
           attempt_details: Json | null
           attempts: number | null
+          caller_user_agent: string | null
           completion_tokens: number | null
           cost_usd: number | null
           created_at: string
@@ -87,6 +88,7 @@ export type Database = {
           model_requested: string | null
           model_used: string | null
           prompt_tokens: number | null
+          request_body: Json | null
           status: string
           total_tokens: number | null
           user_id: string
@@ -94,6 +96,7 @@ export type Database = {
         Insert: {
           attempt_details?: Json | null
           attempts?: number | null
+          caller_user_agent?: string | null
           completion_tokens?: number | null
           cost_usd?: number | null
           created_at?: string
@@ -106,6 +109,7 @@ export type Database = {
           model_requested?: string | null
           model_used?: string | null
           prompt_tokens?: number | null
+          request_body?: Json | null
           status: string
           total_tokens?: number | null
           user_id: string
@@ -113,6 +117,7 @@ export type Database = {
         Update: {
           attempt_details?: Json | null
           attempts?: number | null
+          caller_user_agent?: string | null
           completion_tokens?: number | null
           cost_usd?: number | null
           created_at?: string
@@ -125,6 +130,7 @@ export type Database = {
           model_requested?: string | null
           model_used?: string | null
           prompt_tokens?: number | null
+          request_body?: Json | null
           status?: string
           total_tokens?: number | null
           user_id?: string
