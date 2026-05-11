@@ -5,7 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
 import { toast } from "sonner";
-import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search, BarChart3 } from "lucide-react";
+import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search, BarChart3, Download, Upload } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CodeTabs, buildRequestSnippets } from "@/components/CodeBlock";
