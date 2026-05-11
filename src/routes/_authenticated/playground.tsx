@@ -612,15 +612,16 @@ function ChatBubble({
   return (
     <div className={"group rounded-lg border p-3 " + colors[msg.role]}>
       <div className="mb-2 flex items-center justify-between">
-        <select
-          value={msg.role}
-          onChange={(e) => onChangeRole(e.target.value as Role)}
-          className="rounded-md border border-hairline bg-background px-2 py-0.5 font-mono text-[10.5px] uppercase tracking-wider"
-        >
-          <option value="system">system</option>
-          <option value="user">user</option>
-          <option value="assistant">assistant</option>
-        </select>
+        <Select value={msg.role} onValueChange={(v) => onChangeRole(v as Role)}>
+          <SelectTrigger className="h-6 w-[110px] rounded-md border-hairline bg-background px-2 py-0 font-mono text-[10.5px] uppercase tracking-wider">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="rounded-lg border-hairline">
+            <SelectItem value="system" className="font-mono text-[11px] uppercase tracking-wider">system</SelectItem>
+            <SelectItem value="user" className="font-mono text-[11px] uppercase tracking-wider">user</SelectItem>
+            <SelectItem value="assistant" className="font-mono text-[11px] uppercase tracking-wider">assistant</SelectItem>
+          </SelectContent>
+        </Select>
         <button
           onClick={onDelete}
           className="opacity-0 transition-opacity group-hover:opacity-100"
