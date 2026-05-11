@@ -103,6 +103,39 @@ function Dashboard() {
     refresh();
   };
 
+  const addBulkKeys = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const lines = bulkText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    if (!lines.length) return toast.error("Paste at least one key");
+    const prefix = bulkPrefix.trim();
+    const payload = lines.map((line, i) => {
+      // Accept "label,key" / "label\tkey" / just "key"
+      const m = line.match(/^(.+?)[,\t]\s*(\S+)$/);
+      let label: string;
+      let api_key: string;
+      if (m) {
+        label = m[1].trim();
+        api_key = m[2].trim();
+      } else {
+        api_key = line;
+        label = prefix
+          ? `${prefix} ${i + 1}`
+          : `Key ${keys.length + i + 1}`;
+      }
+      return { user_id: user!.id, label, api_key };
+    }).filter((r) => r.api_key);
+
+    if (!payload.length) return toast.error("No valid keys found");
+    setAdding(true);
+    const { error } = await supabase.from("lightning_keys").insert(payload);
+    setAdding(false);
+    if (error) return toast.error(error.message);
+    setBulkText("");
+    setBulkPrefix("");
+    toast.success(`Added ${payload.length} key${payload.length > 1 ? "s" : ""}`);
+    refresh();
+  };
+
   const removeKey = async (id: string) => {
     const { error } = await supabase.from("lightning_keys").delete().eq("id", id);
     if (error) return toast.error(error.message);
