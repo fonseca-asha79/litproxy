@@ -112,7 +112,7 @@ async function handle(request: Request) {
   let query = supabaseAdmin
     .from("lightning_keys")
     .select("id, label, api_key, last_used_at")
-    .eq("user_id", settings.user_id)
+    .eq("user_id", pk.user_id)
     .eq("is_active", true)
     .order("last_used_at", { ascending: true, nullsFirst: true });
   if (forcedKeyId) query = query.eq("id", forcedKeyId);
@@ -120,7 +120,7 @@ async function handle(request: Request) {
 
   if (!keys || keys.length === 0) {
     await logRequest({
-      user_id: settings.user_id,
+      user_id: pk.user_id,
       model_requested: requestedModel,
       model_used: modelToUse,
       status: "error",
@@ -172,7 +172,7 @@ async function handle(request: Request) {
       if (isStream) {
         // Stream-through; we cannot count tokens reliably without parsing SSE.
         await logRequest({
-          user_id: settings.user_id,
+          user_id: pk.user_id,
           model_requested: requestedModel,
           model_used: modelToUse,
           lightning_key_id: key.id,
@@ -203,7 +203,7 @@ async function handle(request: Request) {
       const cost = computeCost(modelToUse, pt, ct);
 
       await logRequest({
-        user_id: settings.user_id,
+        user_id: pk.user_id,
         model_requested: requestedModel,
         model_used: modelToUse,
         lightning_key_id: key.id,
@@ -246,7 +246,7 @@ async function handle(request: Request) {
   // All keys failed
   const last = attempts[attempts.length - 1];
   await logRequest({
-    user_id: settings.user_id,
+    user_id: pk.user_id,
     model_requested: requestedModel,
     model_used: modelToUse,
     lightning_key_id: last?.key_id,
