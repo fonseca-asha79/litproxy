@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/playground")({
 interface Settings {
   user_id: string;
   default_model: string;
-  proxy_api_key: string;
 }
 interface KeyRow { id: string; label: string; is_active: boolean }
 type Role = "system" | "user" | "assistant";
