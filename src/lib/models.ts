@@ -27,7 +27,7 @@ export const MODELS: ModelInfo[] = [
 
   // ---- Anthropic ----
   { id: "anthropic/claude-opus-4-7",            name: "Claude Opus 4.7",   provider: "anthropic", inputPrice: 5.00,  outputPrice: 25.00, context: "200K" },
-  { id: "anthropic/claude-4-6-opus",            name: "Claude 4.6 Opus",   provider: "anthropic", inputPrice: 5.00,  outputPrice: 25.00, context: "200K" },
+  
   { id: "anthropic/claude-sonnet-4-6",          name: "Claude Sonnet 4.6", provider: "anthropic", inputPrice: 3.00,  outputPrice: 15.00, context: "200K" },
   { id: "anthropic/claude-opus-4-6",            name: "Claude Opus 4.6",   provider: "anthropic", inputPrice: 5.00,  outputPrice: 25.00, context: "200K" },
   { id: "anthropic/claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5", provider: "anthropic", inputPrice: 3.00,  outputPrice: 15.00, context: "200K" },
