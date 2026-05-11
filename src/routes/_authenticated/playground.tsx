@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
+import { getCaps, applyCapsToBody } from "@/lib/model-capabilities";
 import { toast } from "sonner";
 import { Play, Eraser, Plus, Trash2, Send, Code2, MessageSquare, Settings2, Square } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
