@@ -101,20 +101,21 @@ function ModelsPage() {
                 </button>
               ))}
             </div>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="rounded-md border border-hairline bg-surface/60 px-3 py-1.5 text-[12px] focus:border-brand focus:outline-none"
-            >
-              <option value="default">Sort: Default</option>
-              <option value="price-asc">Input price: low → high</option>
-              <option value="price-desc">Input price: high → low</option>
-              <option value="out-asc">Output price: low → high</option>
-              <option value="out-desc">Output price: high → low</option>
-              <option value="context">Context: largest first</option>
-              <option value="name">Name (A–Z)</option>
-              <option value="provider">Provider</option>
-            </select>
+            <Select value={sort} onValueChange={setSort}>
+              <SelectTrigger className="h-9 w-auto min-w-[200px] rounded-md border-hairline bg-surface/60 text-[12px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg border-hairline">
+                <SelectItem value="default">Sort: Default</SelectItem>
+                <SelectItem value="price-asc">Input price: low → high</SelectItem>
+                <SelectItem value="price-desc">Input price: high → low</SelectItem>
+                <SelectItem value="out-asc">Output price: low → high</SelectItem>
+                <SelectItem value="out-desc">Output price: high → low</SelectItem>
+                <SelectItem value="context">Context: largest first</SelectItem>
+                <SelectItem value="name">Name (A–Z)</SelectItem>
+                <SelectItem value="provider">Provider</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </section>
