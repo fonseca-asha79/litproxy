@@ -68,26 +68,32 @@ function Dashboard() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<Settings | null>(null);
   const [keys, setKeys] = useState<LightningKey[]>([]);
+  const [proxyKeys, setProxyKeys] = useState<ProxyKey[]>([]);
   const [logs, setLogs] = useState<LogRow[]>([]);
-  const [showProxy, setShowProxy] = useState(false);
+  const [showKey, setShowKey] = useState<Record<string, boolean>>({});
   const [newLabel, setNewLabel] = useState("");
   const [newKey, setNewKey] = useState("");
   const [adding, setAdding] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [bulkPrefix, setBulkPrefix] = useState("");
+  const [pkName, setPkName] = useState("");
+  const [pkAllowed, setPkAllowed] = useState<string[]>([]);
+  const [pkRate, setPkRate] = useState<string>("");
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const endpoint = `${baseUrl}/api/public/v1`;
 
   const refresh = async () => {
-    const [s, k, l] = await Promise.all([
+    const [s, k, p, l] = await Promise.all([
       supabase.from("user_settings").select("*").maybeSingle(),
       supabase.from("lightning_keys").select("*").order("created_at", { ascending: false }),
+      supabase.from("proxy_keys").select("*").order("created_at", { ascending: true }),
       supabase.from("request_logs").select("*").order("created_at", { ascending: false }).limit(1000),
     ]);
     if (s.data) setSettings(s.data as Settings);
     if (k.data) setKeys(k.data as LightningKey[]);
+    if (p.data) setProxyKeys(p.data as ProxyKey[]);
     if (l.data) setLogs(l.data as LogRow[]);
   };
 
