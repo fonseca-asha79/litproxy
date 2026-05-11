@@ -93,6 +93,8 @@ async function handle(request: Request) {
       http_status: 400,
       error_message: "No active Lightning AI keys configured.",
       latency_ms: Date.now() - started,
+      request_body: loggedBody,
+      caller_user_agent: callerUA,
     });
     return jsonError(400, "No active Lightning AI keys configured. Add one in your dashboard.");
   }
