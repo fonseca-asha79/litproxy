@@ -121,6 +121,7 @@ async function handle(request: Request) {
   if (!keys || keys.length === 0) {
     await logRequest({
       user_id: pk.user_id,
+      proxy_key_id: pk.id,
       model_requested: requestedModel,
       model_used: modelToUse,
       status: "error",
@@ -173,6 +174,7 @@ async function handle(request: Request) {
         // Stream-through; we cannot count tokens reliably without parsing SSE.
         await logRequest({
           user_id: pk.user_id,
+      proxy_key_id: pk.id,
           model_requested: requestedModel,
           model_used: modelToUse,
           lightning_key_id: key.id,
@@ -204,6 +206,7 @@ async function handle(request: Request) {
 
       await logRequest({
         user_id: pk.user_id,
+      proxy_key_id: pk.id,
         model_requested: requestedModel,
         model_used: modelToUse,
         lightning_key_id: key.id,
@@ -247,6 +250,7 @@ async function handle(request: Request) {
   const last = attempts[attempts.length - 1];
   await logRequest({
     user_id: pk.user_id,
+      proxy_key_id: pk.id,
     model_requested: requestedModel,
     model_used: modelToUse,
     lightning_key_id: last?.key_id,
