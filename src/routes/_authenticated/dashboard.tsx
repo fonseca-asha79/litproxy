@@ -351,6 +351,54 @@ function Dashboard() {
             <Card
               title="Lightning AI keys"
               desc="Keys rotate by least-recent use. If one fails, the next is tried automatically."
+              action={
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json,.csv,application/json,text/csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) importKeys(f);
+                      e.target.value = "";
+                    }}
+                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-background px-2.5 py-1.5 text-[12px] text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                      >
+                        <Upload className="h-3.5 w-3.5" /> Import
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-[160px]">
+                      <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                        From JSON or CSV…
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-background px-2.5 py-1.5 text-[12px] text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                      >
+                        <Download className="h-3.5 w-3.5" /> Export
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-[140px]">
+                      <DropdownMenuItem onClick={() => exportKeys("json")}>
+                        Export as JSON
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => exportKeys("csv")}>
+                        Export as CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              }
             >
               <form onSubmit={addKey} className="grid gap-2 md:grid-cols-[1fr_2fr_auto]">
                 <input
