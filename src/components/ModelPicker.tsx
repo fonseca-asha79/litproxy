@@ -128,13 +128,10 @@ export function ModelPicker({
             return v.includes(s) ? 1 : 0;
           }}
         >
-          <div className="flex items-center gap-2 border-b border-hairline px-3">
-            <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-            <CommandInput
-              placeholder="Search models, e.g. opus, gemini, 70b…"
-              className="h-10 border-0 px-0 text-[13px] focus:ring-0"
-            />
-          </div>
+          <CommandInput
+            placeholder="Search models, e.g. opus, gemini, 70b…"
+            className="h-10 text-[13px]"
+          />
           <CommandList className="max-h-[420px]">
             <CommandEmpty className="py-8 text-center text-[12.5px] text-muted-foreground">
               No model matches.
