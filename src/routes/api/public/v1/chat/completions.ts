@@ -12,6 +12,30 @@ interface AttemptRecord {
   ms: number;
 }
 
+// Models that reject `temperature` / `top_p` / `frequency_penalty` / `presence_penalty`.
+// Anthropic's newer reasoning models (opus 4.6+, sonnet 4.6+) and OpenAI gpt-5 reasoning
+// family deprecate these. We strip and retry on the relevant 400.
+const UNSUPPORTED_PARAM_REGEX = /(temperature|top_p|frequency_penalty|presence_penalty|max_tokens)/i;
+const DEPRECATED_ERROR_REGEX = /(deprecated|unsupported|not supported|unrecognized|unknown parameter)/i;
+
+function stripParam(body: any, errText: string): string[] {
+  const stripped: string[] = [];
+  for (const p of ["temperature", "top_p", "frequency_penalty", "presence_penalty", "max_tokens", "n", "seed"]) {
+    if (errText.toLowerCase().includes(p) && body[p] !== undefined) {
+      delete body[p];
+      stripped.push(p);
+    }
+  }
+  return stripped;
+}
+
+function isAuthFailure(status: number, errText: string): boolean {
+  if (status === 401 || status === 403) return true;
+  // Cloudflare HTML block page
+  if (errText.includes("<!DOCTYPE html") && errText.toLowerCase().includes("cloudflare")) return true;
+  return false;
+}
+
 async function handle(request: Request) {
   const started = Date.now();
 
@@ -85,31 +109,60 @@ async function handle(request: Request) {
   const attempts: AttemptRecord[] = [];
 
   for (const key of keys) {
-    const aStart = Date.now();
-    let upstream: Response;
-    try {
-      upstream = await fetch(`${LIGHTNING_BASE}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key.api_key}`,
-        },
-        body: JSON.stringify(body),
-      });
-    } catch (e: any) {
-      const ms = Date.now() - aStart;
-      attempts.push({ key_id: key.id, key_label: key.label, http_status: 0, error: String(e?.message || e), ms });
+    let upstream: Response | null = null;
+    let errText = "";
+    let aStart = Date.now();
+    let ms = 0;
+    let fetchErr = "";
+
+    // Up to 3 tries per key — strip an unsupported param each retry.
+    for (let tryNum = 0; tryNum < 3; tryNum++) {
+      aStart = Date.now();
+      try {
+        upstream = await fetch(`${LIGHTNING_BASE}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${key.api_key}`,
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (e: any) {
+        ms = Date.now() - aStart;
+        fetchErr = String(e?.message || e);
+        upstream = null;
+        break;
+      }
+      ms = Date.now() - aStart;
+
+      if (upstream.ok) break;
+
+      try { errText = await upstream.text(); } catch { errText = ""; }
+
+      if (
+        upstream.status >= 400 &&
+        DEPRECATED_ERROR_REGEX.test(errText) &&
+        UNSUPPORTED_PARAM_REGEX.test(errText)
+      ) {
+        const stripped = stripParam(body, errText);
+        if (stripped.length > 0) {
+          attempts.push({ key_id: key.id, key_label: key.label, http_status: upstream.status, error: `Stripped unsupported param(s): ${stripped.join(", ")} — retrying`, ms });
+          continue;
+        }
+      }
+      break;
+    }
+
+    if (!upstream) {
+      attempts.push({ key_id: key.id, key_label: key.label, http_status: 0, error: fetchErr, ms });
       await supabaseAdmin
         .from("lightning_keys")
-        .update({ failure_count: ((key as any).failure_count || 0) + 1, last_error: String(e?.message || e), last_used_at: new Date().toISOString() })
+        .update({ failure_count: ((key as any).failure_count || 0) + 1, last_error: fetchErr.slice(0, 500), last_used_at: new Date().toISOString() })
         .eq("id", key.id);
       continue;
     }
 
-    const ms = Date.now() - aStart;
-
     if (upstream.ok) {
-      // Mark key as used (success resets failure_count)
       await supabaseAdmin
         .from("lightning_keys")
         .update({ last_used_at: new Date().toISOString(), failure_count: 0, last_error: null })
@@ -118,7 +171,6 @@ async function handle(request: Request) {
       attempts.push({ key_id: key.id, key_label: key.label, http_status: upstream.status, ms });
 
       if (isStream) {
-        // Stream-through; we cannot count tokens reliably without parsing SSE.
         await logRequest({
           user_id: settings.user_id,
           model_requested: requestedModel,
@@ -171,18 +223,22 @@ async function handle(request: Request) {
       });
     }
 
-    // Failure on this key — capture body, increment failure_count, try next
-    let errText = "";
-    try {
-      errText = await upstream.text();
-    } catch {}
-    attempts.push({ key_id: key.id, key_label: key.label, http_status: upstream.status, error: errText.slice(0, 1000), ms });
+    // Failure on this key
+    const cleanErr = errText.includes("<!DOCTYPE")
+      ? `Upstream returned an HTML error page (HTTP ${upstream.status}) — usually means this Lightning AI key is invalid or blocked.`
+      : errText.slice(0, 1000);
+    attempts.push({ key_id: key.id, key_label: key.label, http_status: upstream.status, error: cleanErr, ms });
+
+    const newFailureCount = ((key as any).failure_count || 0) + 1;
+    const authBad = isAuthFailure(upstream.status, errText);
     await supabaseAdmin
       .from("lightning_keys")
       .update({
-        failure_count: ((key as any).failure_count || 0) + 1,
-        last_error: errText.slice(0, 500),
+        failure_count: newFailureCount,
+        last_error: cleanErr.slice(0, 500),
         last_used_at: new Date().toISOString(),
+        // Auto-deactivate keys that fail auth — prevents Cloudflare HTML loop.
+        is_active: authBad ? false : true,
       })
       .eq("id", key.id);
   }
