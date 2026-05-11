@@ -53,6 +53,21 @@ async function handle(request: Request) {
   body.model = modelToUse;
   const isStream = !!body?.stream;
 
+  // Capture caller UA so we can forward it upstream + log it for debugging WAF blocks.
+  const callerUA = request.headers.get("user-agent") || "";
+  const upstreamUA = callerUA || "OpenAI/Proxy (litproxy)";
+
+  // Snapshot body for logging (truncate huge messages so jsonb stays sane).
+  const loggedBody = (() => {
+    try {
+      const s = JSON.stringify(body);
+      if (s.length <= 20000) return body;
+      return { _truncated: true, _original_size: s.length, preview: s.slice(0, 20000) };
+    } catch {
+      return null;
+    }
+  })();
+
   // Optional: force a specific Lightning key (used by the playground).
   const forcedKeyId =
     request.headers.get("x-lightning-key-id") ||
