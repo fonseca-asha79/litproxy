@@ -223,6 +223,8 @@ async function handle(request: Request) {
     latency_ms: Date.now() - started,
     attempts: attempts.length,
     attempt_details: attempts,
+    request_body: loggedBody,
+    caller_user_agent: callerUA,
   });
 
   return new Response(
