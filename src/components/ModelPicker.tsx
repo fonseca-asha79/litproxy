@@ -54,6 +54,7 @@ export function ModelPicker({
   placeholder = "Select a model…",
 }: Props) {
   const [open, setOpen] = React.useState(false);
+  const [filter, setFilter] = React.useState<Provider | "all">("all");
 
   const grouped = React.useMemo(() => {
     const map: Record<Provider, ModelInfo[]> = {
@@ -132,6 +133,29 @@ export function ModelPicker({
             placeholder="Search models, e.g. opus, gemini, 70b…"
             className="h-10 text-[13px]"
           />
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-hairline px-3 py-2">
+            {(["all", ...ORDER] as const).map((p) => {
+              const active = filter === p;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setFilter(p)}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors",
+                    active
+                      ? "border-brand/40 bg-brand/10 text-foreground"
+                      : "border-hairline bg-transparent text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {p !== "all" && (
+                    <span className={cn("h-1.5 w-1.5 rounded-full", PROVIDER_DOT[p])} />
+                  )}
+                  {p === "all" ? "All" : PROVIDER_LABEL[p]}
+                </button>
+              );
+            })}
+          </div>
           <CommandList className="max-h-[420px]">
             <CommandEmpty className="py-8 text-center text-[12.5px] text-muted-foreground">
               No model matches.
@@ -172,6 +196,7 @@ export function ModelPicker({
             {ORDER.map((prov, i) => {
               const items = grouped[prov];
               if (!items.length) return null;
+              if (filter !== "all" && filter !== prov) return null;
               return (
                 <React.Fragment key={prov}>
                   {i > 0 && <CommandSeparator />}
@@ -198,7 +223,7 @@ export function ModelPicker({
                             onChange(m.id);
                             setOpen(false);
                           }}
-                          className="items-start gap-3 rounded-md px-2 py-2 aria-selected:bg-accent/60"
+                          className="items-start gap-3 rounded-md py-2 pl-5 pr-2 aria-selected:bg-accent/60"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
