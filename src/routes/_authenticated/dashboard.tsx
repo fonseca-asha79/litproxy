@@ -1,11 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
 import { toast } from "sonner";
-import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search, BarChart3 } from "lucide-react";
+import { Copy, Trash2, Plus, RefreshCw, Eye, EyeOff, ArrowUpRight, KeyRound, Activity, Settings as SettingsIcon, Check, Search, BarChart3, Download, Upload } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CodeTabs, buildRequestSnippets } from "@/components/CodeBlock";
@@ -102,6 +109,109 @@ function Dashboard() {
   const toggleKey = async (id: string, is_active: boolean) => {
     await supabase.from("lightning_keys").update({ is_active: !is_active }).eq("id", id);
     refresh();
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const exportKeys = (format: "json" | "csv") => {
+    if (!keys.length) return toast.error("No keys to export");
+    const rows = keys.map((k) => ({
+      label: k.label,
+      api_key: k.api_key,
+      is_active: k.is_active,
+    }));
+    let blob: Blob;
+    let filename: string;
+    if (format === "json") {
+      blob = new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" });
+      filename = `lightning-keys-${new Date().toISOString().slice(0, 10)}.json`;
+    } else {
+      const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+      const csv = [
+        "label,api_key,is_active",
+        ...rows.map((r) => [esc(r.label), esc(r.api_key), r.is_active].join(",")),
+      ].join("\n");
+      blob = new Blob([csv], { type: "text/csv" });
+      filename = `lightning-keys-${new Date().toISOString().slice(0, 10)}.csv`;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${rows.length} keys`);
+  };
+
+  const importKeys = async (file: File) => {
+    try {
+      const text = await file.text();
+      type Row = { label?: string; api_key?: string; is_active?: boolean | string };
+      let rows: Row[] = [];
+      const isJson =
+        file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("[") || text.trim().startsWith("{");
+      if (isJson) {
+        const parsed = JSON.parse(text);
+        rows = Array.isArray(parsed) ? parsed : [parsed];
+      } else {
+        const lines = text.split(/\r?\n/).filter((l) => l.trim());
+        if (!lines.length) throw new Error("Empty file");
+        const parseCsvLine = (line: string): string[] => {
+          const out: string[] = [];
+          let cur = "";
+          let inQ = false;
+          for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            if (inQ) {
+              if (c === '"' && line[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else if (c === '"') inQ = false;
+              else cur += c;
+            } else {
+              if (c === '"') inQ = true;
+              else if (c === ",") {
+                out.push(cur);
+                cur = "";
+              } else cur += c;
+            }
+          }
+          out.push(cur);
+          return out;
+        };
+        const header = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+        rows = lines.slice(1).map((line) => {
+          const cols = parseCsvLine(line);
+          const r: Row = {};
+          header.forEach((h, idx) => {
+            (r as Record<string, unknown>)[h] = cols[idx];
+          });
+          return r;
+        });
+      }
+
+      const payload = rows
+        .map((r, i) => ({
+          user_id: user!.id,
+          label: (r.label?.toString().trim() || `Imported ${keys.length + i + 1}`),
+          api_key: r.api_key?.toString().trim() || "",
+          is_active:
+            typeof r.is_active === "boolean"
+              ? r.is_active
+              : ["false", "0", "no"].includes(String(r.is_active ?? "").toLowerCase())
+                ? false
+                : true,
+        }))
+        .filter((r) => r.api_key);
+
+      if (!payload.length) return toast.error("No valid keys found in file");
+      const { error } = await supabase.from("lightning_keys").insert(payload);
+      if (error) return toast.error(error.message);
+      toast.success(`Imported ${payload.length} keys`);
+      refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to import");
+    }
   };
 
   const updateModel = async (model: string) => {
@@ -241,6 +351,54 @@ function Dashboard() {
             <Card
               title="Lightning AI keys"
               desc="Keys rotate by least-recent use. If one fails, the next is tried automatically."
+              action={
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json,.csv,application/json,text/csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) importKeys(f);
+                      e.target.value = "";
+                    }}
+                  />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-background px-2.5 py-1.5 text-[12px] text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                      >
+                        <Upload className="h-3.5 w-3.5" /> Import
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-[160px]">
+                      <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>
+                        From JSON or CSV…
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-background px-2.5 py-1.5 text-[12px] text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                      >
+                        <Download className="h-3.5 w-3.5" /> Export
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="min-w-[140px]">
+                      <DropdownMenuItem onClick={() => exportKeys("json")}>
+                        Export as JSON
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => exportKeys("csv")}>
+                        Export as CSV
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              }
             >
               <form onSubmit={addKey} className="grid gap-2 md:grid-cols-[1fr_2fr_auto]">
                 <input
