@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Header } from "@/components/Header";
 import { MODELS } from "@/lib/models";
 import { Search, Copy } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/models")({
