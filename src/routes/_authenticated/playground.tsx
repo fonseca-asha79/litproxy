@@ -8,7 +8,9 @@ import { getCaps, applyCapsToBody } from "@/lib/model-capabilities";
 import { toast } from "sonner";
 import { Play, Eraser, Plus, Trash2, Send, Code2, MessageSquare, Settings2, Square } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CodeTabs } from "@/components/CodeBlock";
+import { ModelPicker } from "@/components/ModelPicker";
 
 export const Route = createFileRoute("/_authenticated/playground")({
   head: () => ({ meta: [{ title: "Playground — Litproxy" }] }),
