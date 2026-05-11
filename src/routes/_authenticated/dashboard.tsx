@@ -36,7 +36,16 @@ interface LightningKey {
 interface Settings {
   user_id: string;
   default_model: string;
-  proxy_api_key: string;
+}
+interface ProxyKey {
+  id: string;
+  name: string;
+  api_key: string;
+  is_active: boolean;
+  allowed_models: string[];
+  rate_limit_per_min: number | null;
+  last_used_at: string | null;
+  created_at: string;
 }
 interface LogRow {
   id: string;
