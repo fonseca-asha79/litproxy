@@ -223,7 +223,7 @@ export function ModelPicker({
                             onChange(m.id);
                             setOpen(false);
                           }}
-                          className="items-start gap-3 rounded-md px-2 py-2 aria-selected:bg-accent/60"
+                          className="items-start gap-3 rounded-md py-2 pl-5 pr-2 aria-selected:bg-accent/60"
                         >
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
