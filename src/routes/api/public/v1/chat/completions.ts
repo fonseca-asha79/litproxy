@@ -27,16 +27,41 @@ async function handle(request: Request) {
     return jsonError(401, "Missing API key. Pass it as `Authorization: Bearer <key>` or `?api_key=<key>`.");
   }
 
-  // Look up user by proxy key
-  const { data: settings, error: sErr } = await supabaseAdmin
-    .from("user_settings")
-    .select("user_id, default_model")
-    .eq("proxy_api_key", proxyKey)
+  // Look up proxy key (multi-key) — must be active
+  const { data: pk, error: pkErr } = await supabaseAdmin
+    .from("proxy_keys")
+    .select("id, user_id, name, is_active, allowed_models, rate_limit_per_min")
+    .eq("api_key", proxyKey)
     .maybeSingle();
 
-  if (sErr || !settings) {
+  if (pkErr || !pk) {
     return jsonError(401, "Invalid API key.");
   }
+  if (!pk.is_active) {
+    return jsonError(403, "This API key is paused.");
+  }
+
+  // Per-key rate limit (requests in the last 60s, based on request_logs)
+  if (pk.rate_limit_per_min && pk.rate_limit_per_min > 0) {
+    const since = new Date(Date.now() - 60_000).toISOString();
+    const { count } = await supabaseAdmin
+      .from("request_logs")
+      .select("id", { count: "exact", head: true })
+      .eq("proxy_key_id", pk.id)
+      .gte("created_at", since);
+    if ((count ?? 0) >= pk.rate_limit_per_min) {
+      return jsonError(429, `Rate limit exceeded for this key (${pk.rate_limit_per_min}/min).`);
+    }
+  }
+
+  // Resolve user default model
+  const { data: settings } = await supabaseAdmin
+    .from("user_settings")
+    .select("user_id, default_model")
+    .eq("user_id", pk.user_id)
+    .maybeSingle();
+
+  const defaultModel = settings?.default_model || "openai/gpt-5-mini";
 
   // Parse body
   let body: any;
@@ -49,7 +74,16 @@ async function handle(request: Request) {
   const requestedModel: string | null = body?.model || null;
   const isDefaultAlias =
     !requestedModel || ["default", "none", "auto"].includes(String(requestedModel).trim().toLowerCase());
-  const modelToUse = isDefaultAlias ? settings.default_model : requestedModel!;
+  const modelToUse = isDefaultAlias ? defaultModel : requestedModel!;
+
+  // Per-key allowed_models scope
+  if (pk.allowed_models && pk.allowed_models.length > 0 && !pk.allowed_models.includes(modelToUse)) {
+    return jsonError(
+      403,
+      `Model "${modelToUse}" is not allowed by this API key. Allowed: ${pk.allowed_models.join(", ")}`,
+    );
+  }
+
   body.model = modelToUse;
   const isStream = !!body?.stream;
 
@@ -78,7 +112,7 @@ async function handle(request: Request) {
   let query = supabaseAdmin
     .from("lightning_keys")
     .select("id, label, api_key, last_used_at")
-    .eq("user_id", settings.user_id)
+    .eq("user_id", pk.user_id)
     .eq("is_active", true)
     .order("last_used_at", { ascending: true, nullsFirst: true });
   if (forcedKeyId) query = query.eq("id", forcedKeyId);
@@ -86,7 +120,8 @@ async function handle(request: Request) {
 
   if (!keys || keys.length === 0) {
     await logRequest({
-      user_id: settings.user_id,
+      user_id: pk.user_id,
+      proxy_key_id: pk.id,
       model_requested: requestedModel,
       model_used: modelToUse,
       status: "error",
@@ -138,7 +173,8 @@ async function handle(request: Request) {
       if (isStream) {
         // Stream-through; we cannot count tokens reliably without parsing SSE.
         await logRequest({
-          user_id: settings.user_id,
+          user_id: pk.user_id,
+      proxy_key_id: pk.id,
           model_requested: requestedModel,
           model_used: modelToUse,
           lightning_key_id: key.id,
@@ -169,7 +205,8 @@ async function handle(request: Request) {
       const cost = computeCost(modelToUse, pt, ct);
 
       await logRequest({
-        user_id: settings.user_id,
+        user_id: pk.user_id,
+      proxy_key_id: pk.id,
         model_requested: requestedModel,
         model_used: modelToUse,
         lightning_key_id: key.id,
@@ -212,7 +249,8 @@ async function handle(request: Request) {
   // All keys failed
   const last = attempts[attempts.length - 1];
   await logRequest({
-    user_id: settings.user_id,
+    user_id: pk.user_id,
+      proxy_key_id: pk.id,
     model_requested: requestedModel,
     model_used: modelToUse,
     lightning_key_id: last?.key_id,
