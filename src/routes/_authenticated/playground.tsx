@@ -119,7 +119,7 @@ function Playground() {
   const headersFor = (): Record<string, string> => {
     const h: Record<string, string> = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${settings?.proxy_api_key || ""}`,
+      Authorization: `Bearer ${proxyKey}`,
     };
     if (params.keyId !== "auto") h["X-Lightning-Key-Id"] = params.keyId;
     return h;
@@ -256,7 +256,7 @@ function Playground() {
   const codeSnippets = useMemo(() => {
     const messages = chat.length > 1 ? chat : [{ role: "user", content: single }];
     const body = buildBody(messages as Msg[]);
-    const apiKey = settings?.proxy_api_key || "<your_proxy_key>";
+    const apiKey = proxyKey || "<your_proxy_key>";
     const bodyJson = JSON.stringify(body, null, 2);
     return [
       {
