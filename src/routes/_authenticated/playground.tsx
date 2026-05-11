@@ -58,6 +58,7 @@ const defaultParams: Params = {
 function Playground() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [proxyKey, setProxyKey] = useState<string>("");
   const [keys, setKeys] = useState<KeyRow[]>([]);
   const [params, setParams] = useState<Params>(defaultParams);
 
