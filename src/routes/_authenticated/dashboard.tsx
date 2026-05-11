@@ -64,6 +64,9 @@ function Dashboard() {
   const [newLabel, setNewLabel] = useState("");
   const [newKey, setNewKey] = useState("");
   const [adding, setAdding] = useState(false);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
+  const [bulkPrefix, setBulkPrefix] = useState("");
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const endpoint = `${baseUrl}/api/public/v1`;
