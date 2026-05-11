@@ -92,6 +92,9 @@ function Playground() {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
   }, [chat, chatBusy]);
 
+  const resolvedModel = params.model === "default" ? (settings?.default_model || "openai/gpt-5-mini") : params.model;
+  const caps = useMemo(() => getCaps(resolvedModel), [resolvedModel]);
+
   const buildBody = (messages: Msg[]) => {
     const body: any = { model: params.model, messages, stream: params.stream };
     const num = (s: string) => (s.trim() === "" ? undefined : Number(s));
@@ -105,7 +108,7 @@ function Playground() {
     if (params.stop.trim()) body.stop = params.stop.split(",").map((s) => s.trim()).filter(Boolean);
     if (params.response_format === "json_object") body.response_format = { type: "json_object" };
     if (params.stream) body.stream_options = { include_usage: true };
-    return body;
+    return applyCapsToBody(body, caps);
   };
 
   const headersFor = (): Record<string, string> => {
