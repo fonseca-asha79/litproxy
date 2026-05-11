@@ -326,46 +326,30 @@ ${params.stream ? "for await (const chunk of response) {\n  process.stdout.write
 
                 <div className="mt-4 space-y-4">
                   <Field label="Model">
-                    <select
+                    <ModelPicker
                       value={params.model}
-                      onChange={(e) => setP("model", e.target.value)}
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                    >
-                      <option value="default">default — uses {settings?.default_model || "dashboard default"}</option>
-                      <optgroup label="OpenAI">
-                        {MODELS.filter((m) => m.provider === "openai").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Anthropic">
-                        {MODELS.filter((m) => m.provider === "anthropic").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Google">
-                        {MODELS.filter((m) => m.provider === "google").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Lightning AI">
-                        {MODELS.filter((m) => m.provider === "lightning-ai").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                    </select>
+                      onChange={(id) => setP("model", id)}
+                      defaultModelId={settings?.default_model}
+                    />
                   </Field>
 
                   <Field label="Lightning key">
-                    <select
-                      value={params.keyId}
-                      onChange={(e) => setP("keyId", e.target.value)}
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                    >
-                      <option value="auto">Auto — rotate ({keys.length})</option>
-                      {keys.map((k) => (
-                        <option key={k.id} value={k.id}>{k.label}</option>
-                      ))}
-                    </select>
+                    <Select value={params.keyId} onValueChange={(v) => setP("keyId", v)}>
+                      <SelectTrigger className="h-10 rounded-lg border-hairline bg-background text-[13px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg border-hairline">
+                        <SelectItem value="auto">
+                          <span className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                            Auto — rotate ({keys.length})
+                          </span>
+                        </SelectItem>
+                        {keys.map((k) => (
+                          <SelectItem key={k.id} value={k.id}>{k.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {keys.length === 0 && (
                       <p className="mt-1.5 text-[11.5px] text-destructive">No active keys. Add one in dashboard.</p>
                     )}
