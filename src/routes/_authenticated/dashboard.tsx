@@ -272,13 +272,52 @@ function Dashboard() {
     toast.success("Default model updated");
   };
 
-  const rotateProxy = async () => {
-    if (!confirm("Rotate proxy API key? Old key will stop working immediately.")) return;
+  const generateProxyKey = async (e: React.FormEvent) => {
+    e.preventDefault();
     const newK = "lvp_" + crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
-    const { error } = await supabase.from("user_settings").update({ proxy_api_key: newK }).eq("user_id", settings!.user_id);
+    const rate = pkRate.trim() ? Math.max(1, parseInt(pkRate, 10)) : null;
+    const { error } = await supabase.from("proxy_keys").insert({
+      user_id: user!.id,
+      name: pkName.trim() || `Key ${proxyKeys.length + 1}`,
+      api_key: newK,
+      allowed_models: pkAllowed,
+      rate_limit_per_min: rate,
+    });
     if (error) return toast.error(error.message);
-    setSettings({ ...settings!, proxy_api_key: newK });
-    toast.success("Proxy key rotated");
+    setPkName("");
+    setPkAllowed([]);
+    setPkRate("");
+    toast.success("Proxy key generated");
+    refresh();
+  };
+
+  const toggleProxyKey = async (pk: ProxyKey) => {
+    await supabase.from("proxy_keys").update({ is_active: !pk.is_active }).eq("id", pk.id);
+    refresh();
+  };
+
+  const deleteProxyKey = async (pk: ProxyKey) => {
+    if (!confirm(`Delete "${pk.name}"? Apps using it will stop working immediately.`)) return;
+    const { error } = await supabase.from("proxy_keys").delete().eq("id", pk.id);
+    if (error) return toast.error(error.message);
+    refresh();
+  };
+
+  const saveProxyKey = async () => {
+    if (!editingPk) return;
+    const rate = editingPk.rate_limit_per_min;
+    const { error } = await supabase
+      .from("proxy_keys")
+      .update({
+        name: editingPk.name.trim() || "Key",
+        allowed_models: editingPk.allowed_models,
+        rate_limit_per_min: rate && rate > 0 ? rate : null,
+      })
+      .eq("id", editingPk.id);
+    if (error) return toast.error(error.message);
+    setEditingPk(null);
+    toast.success("Saved");
+    refresh();
   };
 
   const copy = (s: string, what = "Copied") => {
