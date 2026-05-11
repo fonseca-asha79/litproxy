@@ -377,16 +377,20 @@ ${params.stream ? "for await (const chunk of response) {\n  process.stdout.write
                     {caps.seed && <Field label="Seed"><Num v={params.seed} on={(v) => setP("seed", v)} ph="random" /></Field>}
                     {caps.response_format !== "none" && (
                       <Field label="Format">
-                        <select
+                        <Select
                           value={params.response_format}
-                          onChange={(e) => setP("response_format", e.target.value as any)}
-                          className="w-full rounded-md border border-hairline bg-background px-2 py-1.5 text-[12.5px] focus:border-brand focus:outline-none"
+                          onValueChange={(v) => setP("response_format", v as any)}
                         >
-                          <option value="text">text</option>
-                          <option value="json_object">
-                            {caps.response_format === "json_schema_strict" ? "json (strict schema)" : "json_object"}
-                          </option>
-                        </select>
+                          <SelectTrigger className="h-9 rounded-md border-hairline bg-background text-[12.5px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg border-hairline">
+                            <SelectItem value="text">text</SelectItem>
+                            <SelectItem value="json_object">
+                              {caps.response_format === "json_schema_strict" ? "json (strict schema)" : "json_object"}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </Field>
                     )}
                   </div>
