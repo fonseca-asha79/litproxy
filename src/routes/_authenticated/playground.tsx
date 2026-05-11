@@ -8,7 +8,9 @@ import { getCaps, applyCapsToBody } from "@/lib/model-capabilities";
 import { toast } from "sonner";
 import { Play, Eraser, Plus, Trash2, Send, Code2, MessageSquare, Settings2, Square } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CodeTabs } from "@/components/CodeBlock";
+import { ModelPicker } from "@/components/ModelPicker";
 
 export const Route = createFileRoute("/_authenticated/playground")({
   head: () => ({ meta: [{ title: "Playground — Litproxy" }] }),
@@ -324,46 +326,30 @@ ${params.stream ? "for await (const chunk of response) {\n  process.stdout.write
 
                 <div className="mt-4 space-y-4">
                   <Field label="Model">
-                    <select
+                    <ModelPicker
                       value={params.model}
-                      onChange={(e) => setP("model", e.target.value)}
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                    >
-                      <option value="default">default — uses {settings?.default_model || "dashboard default"}</option>
-                      <optgroup label="OpenAI">
-                        {MODELS.filter((m) => m.provider === "openai").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Anthropic">
-                        {MODELS.filter((m) => m.provider === "anthropic").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Google">
-                        {MODELS.filter((m) => m.provider === "google").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Lightning AI">
-                        {MODELS.filter((m) => m.provider === "lightning-ai").map((m) => (
-                          <option key={m.id} value={m.id}>{m.name} — {m.id}</option>
-                        ))}
-                      </optgroup>
-                    </select>
+                      onChange={(id) => setP("model", id)}
+                      defaultModelId={settings?.default_model}
+                    />
                   </Field>
 
                   <Field label="Lightning key">
-                    <select
-                      value={params.keyId}
-                      onChange={(e) => setP("keyId", e.target.value)}
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                    >
-                      <option value="auto">Auto — rotate ({keys.length})</option>
-                      {keys.map((k) => (
-                        <option key={k.id} value={k.id}>{k.label}</option>
-                      ))}
-                    </select>
+                    <Select value={params.keyId} onValueChange={(v) => setP("keyId", v)}>
+                      <SelectTrigger className="h-10 rounded-lg border-hairline bg-background text-[13px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg border-hairline">
+                        <SelectItem value="auto">
+                          <span className="flex items-center gap-2">
+                            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+                            Auto — rotate ({keys.length})
+                          </span>
+                        </SelectItem>
+                        {keys.map((k) => (
+                          <SelectItem key={k.id} value={k.id}>{k.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     {keys.length === 0 && (
                       <p className="mt-1.5 text-[11.5px] text-destructive">No active keys. Add one in dashboard.</p>
                     )}
@@ -391,16 +377,20 @@ ${params.stream ? "for await (const chunk of response) {\n  process.stdout.write
                     {caps.seed && <Field label="Seed"><Num v={params.seed} on={(v) => setP("seed", v)} ph="random" /></Field>}
                     {caps.response_format !== "none" && (
                       <Field label="Format">
-                        <select
+                        <Select
                           value={params.response_format}
-                          onChange={(e) => setP("response_format", e.target.value as any)}
-                          className="w-full rounded-md border border-hairline bg-background px-2 py-1.5 text-[12.5px] focus:border-brand focus:outline-none"
+                          onValueChange={(v) => setP("response_format", v as any)}
                         >
-                          <option value="text">text</option>
-                          <option value="json_object">
-                            {caps.response_format === "json_schema_strict" ? "json (strict schema)" : "json_object"}
-                          </option>
-                        </select>
+                          <SelectTrigger className="h-9 rounded-md border-hairline bg-background text-[12.5px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent className="rounded-lg border-hairline">
+                            <SelectItem value="text">text</SelectItem>
+                            <SelectItem value="json_object">
+                              {caps.response_format === "json_schema_strict" ? "json (strict schema)" : "json_object"}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
                       </Field>
                     )}
                   </div>
@@ -622,15 +612,16 @@ function ChatBubble({
   return (
     <div className={"group rounded-lg border p-3 " + colors[msg.role]}>
       <div className="mb-2 flex items-center justify-between">
-        <select
-          value={msg.role}
-          onChange={(e) => onChangeRole(e.target.value as Role)}
-          className="rounded-md border border-hairline bg-background px-2 py-0.5 font-mono text-[10.5px] uppercase tracking-wider"
-        >
-          <option value="system">system</option>
-          <option value="user">user</option>
-          <option value="assistant">assistant</option>
-        </select>
+        <Select value={msg.role} onValueChange={(v) => onChangeRole(v as Role)}>
+          <SelectTrigger className="h-6 w-[110px] rounded-md border-hairline bg-background px-2 py-0 font-mono text-[10.5px] uppercase tracking-wider">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="rounded-lg border-hairline">
+            <SelectItem value="system" className="font-mono text-[11px] uppercase tracking-wider">system</SelectItem>
+            <SelectItem value="user" className="font-mono text-[11px] uppercase tracking-wider">user</SelectItem>
+            <SelectItem value="assistant" className="font-mono text-[11px] uppercase tracking-wider">assistant</SelectItem>
+          </SelectContent>
+        </Select>
         <button
           onClick={onDelete}
           className="opacity-0 transition-opacity group-hover:opacity-100"
