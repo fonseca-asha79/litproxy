@@ -111,6 +111,109 @@ function Dashboard() {
     refresh();
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const exportKeys = (format: "json" | "csv") => {
+    if (!keys.length) return toast.error("No keys to export");
+    const rows = keys.map((k) => ({
+      label: k.label,
+      api_key: k.api_key,
+      is_active: k.is_active,
+    }));
+    let blob: Blob;
+    let filename: string;
+    if (format === "json") {
+      blob = new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" });
+      filename = `lightning-keys-${new Date().toISOString().slice(0, 10)}.json`;
+    } else {
+      const esc = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+      const csv = [
+        "label,api_key,is_active",
+        ...rows.map((r) => [esc(r.label), esc(r.api_key), r.is_active].join(",")),
+      ].join("\n");
+      blob = new Blob([csv], { type: "text/csv" });
+      filename = `lightning-keys-${new Date().toISOString().slice(0, 10)}.csv`;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${rows.length} keys`);
+  };
+
+  const importKeys = async (file: File) => {
+    try {
+      const text = await file.text();
+      type Row = { label?: string; api_key?: string; is_active?: boolean | string };
+      let rows: Row[] = [];
+      const isJson =
+        file.name.toLowerCase().endsWith(".json") || text.trim().startsWith("[") || text.trim().startsWith("{");
+      if (isJson) {
+        const parsed = JSON.parse(text);
+        rows = Array.isArray(parsed) ? parsed : [parsed];
+      } else {
+        const lines = text.split(/\r?\n/).filter((l) => l.trim());
+        if (!lines.length) throw new Error("Empty file");
+        const parseCsvLine = (line: string): string[] => {
+          const out: string[] = [];
+          let cur = "";
+          let inQ = false;
+          for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            if (inQ) {
+              if (c === '"' && line[i + 1] === '"') {
+                cur += '"';
+                i++;
+              } else if (c === '"') inQ = false;
+              else cur += c;
+            } else {
+              if (c === '"') inQ = true;
+              else if (c === ",") {
+                out.push(cur);
+                cur = "";
+              } else cur += c;
+            }
+          }
+          out.push(cur);
+          return out;
+        };
+        const header = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+        rows = lines.slice(1).map((line) => {
+          const cols = parseCsvLine(line);
+          const r: Row = {};
+          header.forEach((h, idx) => {
+            (r as Record<string, unknown>)[h] = cols[idx];
+          });
+          return r;
+        });
+      }
+
+      const payload = rows
+        .map((r, i) => ({
+          user_id: user!.id,
+          label: (r.label?.toString().trim() || `Imported ${keys.length + i + 1}`),
+          api_key: r.api_key?.toString().trim() || "",
+          is_active:
+            typeof r.is_active === "boolean"
+              ? r.is_active
+              : ["false", "0", "no"].includes(String(r.is_active ?? "").toLowerCase())
+                ? false
+                : true,
+        }))
+        .filter((r) => r.api_key);
+
+      if (!payload.length) return toast.error("No valid keys found in file");
+      const { error } = await supabase.from("lightning_keys").insert(payload);
+      if (error) return toast.error(error.message);
+      toast.success(`Imported ${payload.length} keys`);
+      refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to import");
+    }
+  };
+
   const updateModel = async (model: string) => {
     if (!settings) return;
     await supabase.from("user_settings").update({ default_model: model }).eq("user_id", settings.user_id);
