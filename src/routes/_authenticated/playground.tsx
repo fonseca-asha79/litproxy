@@ -4,6 +4,7 @@ import { Header } from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { MODELS } from "@/lib/models";
+import { getCaps, applyCapsToBody } from "@/lib/model-capabilities";
 import { toast } from "sonner";
 import { Play, Eraser, Plus, Trash2, Send, Code2, MessageSquare, Settings2, Square } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -91,6 +92,9 @@ function Playground() {
     chatScrollRef.current?.scrollTo({ top: chatScrollRef.current.scrollHeight, behavior: "smooth" });
   }, [chat, chatBusy]);
 
+  const resolvedModel = params.model === "default" ? (settings?.default_model || "openai/gpt-5-mini") : params.model;
+  const caps = useMemo(() => getCaps(resolvedModel), [resolvedModel]);
+
   const buildBody = (messages: Msg[]) => {
     const body: any = { model: params.model, messages, stream: params.stream };
     const num = (s: string) => (s.trim() === "" ? undefined : Number(s));
@@ -104,7 +108,7 @@ function Playground() {
     if (params.stop.trim()) body.stop = params.stop.split(",").map((s) => s.trim()).filter(Boolean);
     if (params.response_format === "json_object") body.response_format = { type: "json_object" };
     if (params.stream) body.stream_options = { include_usage: true };
-    return body;
+    return applyCapsToBody(body, caps);
   };
 
   const headersFor = (): Record<string, string> => {
@@ -376,33 +380,45 @@ ${params.stream ? "for await (const chunk of response) {\n  process.stdout.write
                   </label>
 
                   <div className="grid grid-cols-2 gap-2.5">
-                    <Field label="Temperature"><Num v={params.temperature} on={(v) => setP("temperature", v)} ph="0.7" /></Field>
-                    <Field label="Max tokens"><Num v={params.max_tokens} on={(v) => setP("max_tokens", v)} ph="auto" /></Field>
-                    <Field label="Top P"><Num v={params.top_p} on={(v) => setP("top_p", v)} ph="1" /></Field>
-                    <Field label="N (choices)"><Num v={params.n} on={(v) => setP("n", v)} ph="1" /></Field>
-                    <Field label="Freq. penalty"><Num v={params.frequency_penalty} on={(v) => setP("frequency_penalty", v)} ph="0" /></Field>
-                    <Field label="Pres. penalty"><Num v={params.presence_penalty} on={(v) => setP("presence_penalty", v)} ph="0" /></Field>
-                    <Field label="Seed"><Num v={params.seed} on={(v) => setP("seed", v)} ph="random" /></Field>
-                    <Field label="Format">
-                      <select
-                        value={params.response_format}
-                        onChange={(e) => setP("response_format", e.target.value as any)}
-                        className="w-full rounded-md border border-hairline bg-background px-2 py-1.5 text-[12.5px] focus:border-brand focus:outline-none"
-                      >
-                        <option value="text">text</option>
-                        <option value="json_object">json_object</option>
-                      </select>
+                    {caps.temperature && <Field label="Temperature"><Num v={params.temperature} on={(v) => setP("temperature", v)} ph="0.7" /></Field>}
+                    <Field label={caps.max_tokens_field === "max_completion_tokens" ? "Max completion" : "Max tokens"}>
+                      <Num v={params.max_tokens} on={(v) => setP("max_tokens", v)} ph="auto" />
                     </Field>
+                    {caps.top_p && <Field label="Top P"><Num v={params.top_p} on={(v) => setP("top_p", v)} ph="1" /></Field>}
+                    {caps.n && <Field label="N (choices)"><Num v={params.n} on={(v) => setP("n", v)} ph="1" /></Field>}
+                    {caps.frequency_penalty && <Field label="Freq. penalty"><Num v={params.frequency_penalty} on={(v) => setP("frequency_penalty", v)} ph="0" /></Field>}
+                    {caps.presence_penalty && <Field label="Pres. penalty"><Num v={params.presence_penalty} on={(v) => setP("presence_penalty", v)} ph="0" /></Field>}
+                    {caps.seed && <Field label="Seed"><Num v={params.seed} on={(v) => setP("seed", v)} ph="random" /></Field>}
+                    {caps.response_format !== "none" && (
+                      <Field label="Format">
+                        <select
+                          value={params.response_format}
+                          onChange={(e) => setP("response_format", e.target.value as any)}
+                          className="w-full rounded-md border border-hairline bg-background px-2 py-1.5 text-[12.5px] focus:border-brand focus:outline-none"
+                        >
+                          <option value="text">text</option>
+                          <option value="json_object">
+                            {caps.response_format === "json_schema_strict" ? "json (strict schema)" : "json_object"}
+                          </option>
+                        </select>
+                      </Field>
+                    )}
                   </div>
 
-                  <Field label="Stop (comma separated)">
-                    <input
-                      value={params.stop}
-                      onChange={(e) => setP("stop", e.target.value)}
-                      placeholder="\\n\\n, ###"
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12px] focus:border-brand focus:outline-none"
-                    />
-                  </Field>
+                  {caps.stop && (
+                    <Field label="Stop (comma separated)">
+                      <input
+                        value={params.stop}
+                        onChange={(e) => setP("stop", e.target.value)}
+                        placeholder="\\n\\n, ###"
+                        className="w-full rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12px] focus:border-brand focus:outline-none"
+                      />
+                    </Field>
+                  )}
+
+                  <p className="rounded-md bg-surface/60 px-2.5 py-1.5 text-[11px] text-foreground/55">
+                    Showing only parameters supported by <span className="font-mono">{resolvedModel}</span>.
+                  </p>
 
                   <button
                     onClick={() => setParams(defaultParams)}
