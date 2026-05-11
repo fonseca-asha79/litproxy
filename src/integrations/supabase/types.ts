@@ -124,6 +124,7 @@ export type Database = {
           model_requested: string | null
           model_used: string | null
           prompt_tokens: number | null
+          proxy_key_id: string | null
           request_body: Json | null
           status: string
           total_tokens: number | null
@@ -145,6 +146,7 @@ export type Database = {
           model_requested?: string | null
           model_used?: string | null
           prompt_tokens?: number | null
+          proxy_key_id?: string | null
           request_body?: Json | null
           status: string
           total_tokens?: number | null
@@ -166,6 +168,7 @@ export type Database = {
           model_requested?: string | null
           model_used?: string | null
           prompt_tokens?: number | null
+          proxy_key_id?: string | null
           request_body?: Json | null
           status?: string
           total_tokens?: number | null
