@@ -201,28 +201,34 @@ export function ModelPicker({
                             onChange(m.id);
                             setOpen(false);
                           }}
-                          className="gap-3 rounded-md px-2 py-2 aria-selected:bg-accent/60"
+                          className="items-start gap-3 rounded-md px-2.5 py-2 aria-selected:bg-accent/60"
                         >
+                          <span
+                            className={cn(
+                              "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                              PROVIDER_DOT[m.provider],
+                            )}
+                          />
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
-                              <span className="truncate text-[13px] font-medium">
+                              <span className="truncate text-[13px] font-medium leading-5">
                                 {m.name}
                               </span>
-                              <span className="rounded-sm bg-surface-2 px-1.5 py-px font-mono text-[9.5px] text-muted-foreground">
+                              <span className="rounded-sm bg-surface-2 px-1.5 py-px font-mono text-[9.5px] leading-4 text-muted-foreground">
                                 {m.context}
                               </span>
                             </div>
-                            <div className="truncate font-mono text-[10.5px] text-muted-foreground">
+                            <div className="truncate font-mono text-[10.5px] leading-4 text-muted-foreground">
                               {m.id}
                             </div>
                           </div>
-                          <div className="hidden shrink-0 text-right font-mono text-[10px] text-muted-foreground sm:block">
+                          <div className="hidden shrink-0 text-right font-mono text-[10px] leading-4 text-muted-foreground sm:block">
                             <div>${m.inputPrice.toFixed(2)} in</div>
                             <div>${m.outputPrice.toFixed(2)} out</div>
                           </div>
                           <Check
                             className={cn(
-                              "h-3.5 w-3.5 text-brand",
+                              "mt-1 h-3.5 w-3.5 shrink-0 text-brand",
                               active ? "opacity-100" : "opacity-0",
                             )}
                           />
