@@ -12,6 +12,30 @@ interface AttemptRecord {
   ms: number;
 }
 
+// Models that reject `temperature` / `top_p` / `frequency_penalty` / `presence_penalty`.
+// Anthropic's newer reasoning models (opus 4.6+, sonnet 4.6+) and OpenAI gpt-5 reasoning
+// family deprecate these. We strip and retry on the relevant 400.
+const UNSUPPORTED_PARAM_REGEX = /(temperature|top_p|frequency_penalty|presence_penalty|max_tokens)/i;
+const DEPRECATED_ERROR_REGEX = /(deprecated|unsupported|not supported|unrecognized|unknown parameter)/i;
+
+function stripParam(body: any, errText: string): string[] {
+  const stripped: string[] = [];
+  for (const p of ["temperature", "top_p", "frequency_penalty", "presence_penalty", "max_tokens", "n", "seed"]) {
+    if (errText.toLowerCase().includes(p) && body[p] !== undefined) {
+      delete body[p];
+      stripped.push(p);
+    }
+  }
+  return stripped;
+}
+
+function isAuthFailure(status: number, errText: string): boolean {
+  if (status === 401 || status === 403) return true;
+  // Cloudflare HTML block page
+  if (errText.includes("<!DOCTYPE html") && errText.toLowerCase().includes("cloudflare")) return true;
+  return false;
+}
+
 async function handle(request: Request) {
   const started = Date.now();
 
