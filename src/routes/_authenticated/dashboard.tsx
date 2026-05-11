@@ -80,6 +80,7 @@ function Dashboard() {
   const [pkName, setPkName] = useState("");
   const [pkAllowed, setPkAllowed] = useState<string[]>([]);
   const [pkRate, setPkRate] = useState<string>("");
+  const [editingPk, setEditingPk] = useState<ProxyKey | null>(null);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const endpoint = `${baseUrl}/api/public/v1`;
