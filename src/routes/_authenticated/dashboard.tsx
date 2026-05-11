@@ -395,38 +395,178 @@ function Dashboard() {
           {/* ============ OVERVIEW ============ */}
           <TabsContent value="overview" className="space-y-8 mt-0">
             <Card title="Endpoint" desc="Drop-in replacement for the OpenAI base URL.">
-              <div className="grid gap-4 md:grid-cols-2">
-                <Field label="Base URL">
-                  <div className="flex items-center gap-2">
-                    <input
-                      readOnly
-                      value={endpoint}
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12.5px] text-foreground/85 focus:outline-none"
-                    />
-                    <IconBtn onClick={() => copy(endpoint, "URL copied")}><Copy className="h-3.5 w-3.5" /></IconBtn>
-                  </div>
-                </Field>
-                <Field label="Proxy API key">
-                  <div className="flex items-center gap-2">
-                    <input
-                      readOnly
-                      type={showProxy ? "text" : "password"}
-                      value={settings?.proxy_api_key || ""}
-                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12.5px] text-foreground/85 focus:outline-none"
-                    />
-                    <IconBtn onClick={() => setShowProxy((v) => !v)}>
-                      {showProxy ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                    </IconBtn>
-                    <IconBtn onClick={() => copy(settings?.proxy_api_key || "", "Key copied")}>
-                      <Copy className="h-3.5 w-3.5" />
-                    </IconBtn>
-                    <IconBtn onClick={rotateProxy} title="Rotate"><RefreshCw className="h-3.5 w-3.5" /></IconBtn>
-                  </div>
-                </Field>
-              </div>
+              <Field label="Base URL">
+                <div className="flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={endpoint}
+                    className="w-full rounded-md border border-hairline bg-background px-3 py-2 font-mono text-[12.5px] text-foreground/85 focus:outline-none"
+                  />
+                  <IconBtn onClick={() => copy(endpoint, "URL copied")}><Copy className="h-3.5 w-3.5" /></IconBtn>
+                </div>
+              </Field>
 
-              <div className="mt-5">
-                <CodeTabs snippets={buildRequestSnippets(`${endpoint}`, settings?.proxy_api_key || "<your_key>", "default")} />
+              {(() => {
+                const firstActive = proxyKeys.find((p) => p.is_active) || proxyKeys[0];
+                const sample = firstActive?.api_key || "<your_key>";
+                return (
+                  <div className="mt-5">
+                    <CodeTabs snippets={buildRequestSnippets(`${endpoint}`, sample, "default")} />
+                  </div>
+                );
+              })()}
+            </Card>
+
+            <Card
+              title="Litproxy API keys"
+              desc="Generate multiple keys, name them, and optionally limit each one to specific models or a per-minute rate."
+            >
+              <form onSubmit={generateProxyKey} className="grid gap-2 md:grid-cols-[1fr_1fr_120px_auto]">
+                <input
+                  placeholder="Name (optional)"
+                  value={pkName}
+                  onChange={(e) => setPkName(e.target.value)}
+                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                />
+                <select
+                  multiple
+                  value={pkAllowed}
+                  onChange={(e) =>
+                    setPkAllowed(Array.from(e.target.selectedOptions).map((o) => o.value))
+                  }
+                  className="h-[38px] rounded-md border border-hairline bg-background px-2 text-[12.5px] focus:border-brand focus:outline-none"
+                  title="Hold ⌘/Ctrl to select multiple. Empty = all models."
+                >
+                  {MODELS.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  min={1}
+                  placeholder="req/min"
+                  value={pkRate}
+                  onChange={(e) => setPkRate(e.target.value)}
+                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Generate
+                </button>
+              </form>
+              <p className="mt-2 font-mono text-[10.5px] text-muted-foreground">
+                Empty model list = all models allowed · Empty rate = unlimited
+              </p>
+
+              <div className="mt-5 divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
+                {proxyKeys.length === 0 && (
+                  <div className="bg-background py-10 text-center text-[13.5px] text-muted-foreground">
+                    No proxy keys yet.
+                  </div>
+                )}
+                {proxyKeys.map((pk) => {
+                  const visible = !!showKey[pk.id];
+                  return (
+                    <div key={pk.id} className="bg-background px-4 py-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[14px] font-medium">{pk.name}</span>
+                        {pk.is_active ? (
+                          <span className="rounded-full border border-success/30 bg-success/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-success">active</span>
+                        ) : (
+                          <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">paused</span>
+                        )}
+                        {pk.allowed_models.length > 0 && (
+                          <span className="rounded-full border border-brand/30 bg-brand/10 px-1.5 py-0.5 font-mono text-[10px] text-brand">
+                            {pk.allowed_models.length} model{pk.allowed_models.length > 1 ? "s" : ""}
+                          </span>
+                        )}
+                        {pk.rate_limit_per_min && (
+                          <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                            {pk.rate_limit_per_min}/min
+                          </span>
+                        )}
+                        <div className="ml-auto flex items-center gap-1">
+                          <IconBtn onClick={() => setShowKey((s) => ({ ...s, [pk.id]: !s[pk.id] }))}>
+                            {visible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                          </IconBtn>
+                          <IconBtn onClick={() => copy(pk.api_key, "Key copied")}><Copy className="h-3.5 w-3.5" /></IconBtn>
+                          <button
+                            onClick={() => setEditingPk(pk)}
+                            className="rounded-md border border-hairline px-2.5 py-1 text-[12px] text-foreground/70 hover:border-foreground/40 hover:text-foreground"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => toggleProxyKey(pk)}
+                            className="rounded-md border border-hairline px-2.5 py-1 text-[12px] text-foreground/70 hover:border-foreground/40 hover:text-foreground"
+                          >
+                            {pk.is_active ? "Pause" : "Activate"}
+                          </button>
+                          <IconBtn onClick={() => deleteProxyKey(pk)}>
+                            <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          </IconBtn>
+                        </div>
+                      </div>
+                      <div className="mt-2 truncate font-mono text-[11.5px] text-foreground/70">
+                        {visible ? pk.api_key : `${pk.api_key.slice(0, 8)}${"•".repeat(24)}${pk.api_key.slice(-4)}`}
+                      </div>
+                      {editingPk?.id === pk.id && (
+                        <div className="mt-3 grid gap-2 rounded-md border border-hairline bg-surface/40 p-3 md:grid-cols-[1fr_1fr_120px_auto]">
+                          <input
+                            value={editingPk.name}
+                            onChange={(e) => setEditingPk({ ...editingPk, name: e.target.value })}
+                            placeholder="Name"
+                            className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                          />
+                          <select
+                            multiple
+                            value={editingPk.allowed_models}
+                            onChange={(e) =>
+                              setEditingPk({
+                                ...editingPk,
+                                allowed_models: Array.from(e.target.selectedOptions).map((o) => o.value),
+                              })
+                            }
+                            className="h-[38px] rounded-md border border-hairline bg-background px-2 text-[12px] focus:border-brand focus:outline-none"
+                          >
+                            {MODELS.map((m) => (
+                              <option key={m.id} value={m.id}>{m.name}</option>
+                            ))}
+                          </select>
+                          <input
+                            type="number"
+                            min={1}
+                            placeholder="req/min"
+                            value={editingPk.rate_limit_per_min ?? ""}
+                            onChange={(e) =>
+                              setEditingPk({
+                                ...editingPk,
+                                rate_limit_per_min: e.target.value ? parseInt(e.target.value, 10) : null,
+                              })
+                            }
+                            className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={saveProxyKey}
+                              className="inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:bg-brand-deep"
+                            >
+                              <Check className="h-3.5 w-3.5" /> Save
+                            </button>
+                            <button
+                              onClick={() => setEditingPk(null)}
+                              className="rounded-md border border-hairline px-3 py-1.5 text-[12.5px] text-foreground/70 hover:border-foreground/40"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </Card>
 
