@@ -500,11 +500,20 @@ function Dashboard() {
                         ) : (
                           <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">paused</span>
                         )}
-                        {pk.allowed_models.length > 0 && (
+                        {pk.allowed_models.length > 0 ? (
                           <span className="rounded-full border border-brand/30 bg-brand/10 px-1.5 py-0.5 font-mono text-[10px] text-brand">
                             {pk.allowed_models.length} model{pk.allowed_models.length > 1 ? "s" : ""}
                           </span>
+                        ) : (
+                          <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                            all models
+                          </span>
                         )}
+                        <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                          default: {pk.default_model
+                            ? (MODELS.find((m) => m.id === pk.default_model)?.name || pk.default_model)
+                            : "account"}
+                        </span>
                         {pk.rate_limit_per_min && (
                           <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                             {pk.rate_limit_per_min}/min
