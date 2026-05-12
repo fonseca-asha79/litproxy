@@ -435,46 +435,53 @@ function Dashboard() {
 
             <Card
               title="Litproxy API keys"
-              desc="Generate multiple keys, name them, and optionally limit each one to specific models or a per-minute rate."
+              desc="Generate as many keys as you need. Each key can have its own default model, an allowed-models list, and an optional per-minute rate cap."
             >
-              <form onSubmit={generateProxyKey} className="grid gap-2 md:grid-cols-[1fr_1fr_120px_auto]">
-                <input
-                  placeholder="Name (optional)"
-                  value={pkName}
-                  onChange={(e) => setPkName(e.target.value)}
-                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
-                />
-                <select
-                  multiple
-                  value={pkAllowed}
-                  onChange={(e) =>
-                    setPkAllowed(Array.from(e.target.selectedOptions).map((o) => o.value))
-                  }
-                  className="h-[38px] rounded-md border border-hairline bg-background px-2 text-[12.5px] focus:border-brand focus:outline-none"
-                  title="Hold ⌘/Ctrl to select multiple. Empty = all models."
-                >
-                  {MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  min={1}
-                  placeholder="req/min"
-                  value={pkRate}
-                  onChange={(e) => setPkRate(e.target.value)}
-                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Generate
-                </button>
+              <form onSubmit={generateProxyKey} className="space-y-3">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Name (optional)">
+                    <input
+                      placeholder="e.g. team, mobile-app, scratch"
+                      value={pkName}
+                      onChange={(e) => setPkName(e.target.value)}
+                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                    />
+                  </Field>
+                  <Field label="Rate limit">
+                    <input
+                      type="number"
+                      min={1}
+                      placeholder="req/min · empty = unlimited"
+                      value={pkRate}
+                      onChange={(e) => setPkRate(e.target.value)}
+                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
+                  <Field label="Default model for this key">
+                    <ModelComboPicker
+                      value={pkDefault}
+                      onChange={setPkDefault}
+                      defaultModelId={settings?.default_model}
+                    />
+                  </Field>
+                  <Field label="Allowed models">
+                    <ModelMultiPicker value={pkAllowed} onChange={setPkAllowed} />
+                  </Field>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-mono text-[10.5px] text-muted-foreground">
+                    Empty allowed list = all models · "Account default" follows your dashboard default
+                  </p>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Generate key
+                  </button>
+                </div>
               </form>
-              <p className="mt-2 font-mono text-[10.5px] text-muted-foreground">
-                Empty model list = all models allowed · Empty rate = unlimited
-              </p>
 
               <div className="mt-5 divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
                 {proxyKeys.length === 0 && (
