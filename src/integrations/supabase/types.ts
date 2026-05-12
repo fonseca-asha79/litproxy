@@ -76,6 +76,7 @@ export type Database = {
           allowed_models: string[]
           api_key: string
           created_at: string
+          default_model: string | null
           id: string
           is_active: boolean
           last_used_at: string | null
@@ -87,6 +88,7 @@ export type Database = {
           allowed_models?: string[]
           api_key: string
           created_at?: string
+          default_model?: string | null
           id?: string
           is_active?: boolean
           last_used_at?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           allowed_models?: string[]
           api_key?: string
           created_at?: string
+          default_model?: string | null
           id?: string
           is_active?: boolean
           last_used_at?: string | null

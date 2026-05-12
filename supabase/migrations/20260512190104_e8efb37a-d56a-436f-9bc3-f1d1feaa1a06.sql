@@ -1,0 +1,1 @@
+ALTER TABLE public.proxy_keys ADD COLUMN default_model text;
