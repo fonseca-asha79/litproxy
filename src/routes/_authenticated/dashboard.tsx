@@ -279,17 +279,24 @@ function Dashboard() {
     e.preventDefault();
     const newK = "lvp_" + crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const rate = pkRate.trim() ? Math.max(1, parseInt(pkRate, 10)) : null;
+    const def = pkDefault === "default" ? null : pkDefault;
+    // Validate per-key default is in allowed list (if list non-empty)
+    if (def && pkAllowed.length > 0 && !pkAllowed.includes(def)) {
+      return toast.error("Per-key default model must be in the allowed list (or allow all).");
+    }
     const { error } = await supabase.from("proxy_keys").insert({
       user_id: user!.id,
       name: pkName.trim() || `Key ${proxyKeys.length + 1}`,
       api_key: newK,
       allowed_models: pkAllowed,
       rate_limit_per_min: rate,
+      default_model: def,
     });
     if (error) return toast.error(error.message);
     setPkName("");
     setPkAllowed([]);
     setPkRate("");
+    setPkDefault("default");
     toast.success("Proxy key generated");
     refresh();
   };
@@ -309,12 +316,17 @@ function Dashboard() {
   const saveProxyKey = async () => {
     if (!editingPk) return;
     const rate = editingPk.rate_limit_per_min;
+    const def = editingPk.default_model;
+    if (def && editingPk.allowed_models.length > 0 && !editingPk.allowed_models.includes(def)) {
+      return toast.error("Per-key default model must be in the allowed list (or allow all).");
+    }
     const { error } = await supabase
       .from("proxy_keys")
       .update({
         name: editingPk.name.trim() || "Key",
         allowed_models: editingPk.allowed_models,
         rate_limit_per_min: rate && rate > 0 ? rate : null,
+        default_model: def || null,
       })
       .eq("id", editingPk.id);
     if (error) return toast.error(error.message);
