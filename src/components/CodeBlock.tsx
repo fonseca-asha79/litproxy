@@ -1,6 +1,7 @@
 import { Highlight, themes } from "prism-react-renderer";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export interface CodeSnippet {
   label: string;
@@ -16,6 +17,7 @@ export function CodeTabs({ snippets }: { snippets: CodeSnippet[] }) {
   const copy = () => {
     navigator.clipboard.writeText(current.code);
     setCopied(true);
+    toast.success(`Copied ${current.label} snippet`);
     setTimeout(() => setCopied(false), 1400);
   };
 
