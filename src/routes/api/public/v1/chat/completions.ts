@@ -30,7 +30,7 @@ async function handle(request: Request) {
   // Look up proxy key (multi-key) — must be active
   const { data: pk, error: pkErr } = await supabaseAdmin
     .from("proxy_keys")
-    .select("id, user_id, name, is_active, allowed_models, rate_limit_per_min")
+    .select("id, user_id, name, is_active, allowed_models, rate_limit_per_min, default_model")
     .eq("api_key", proxyKey)
     .maybeSingle();
 
@@ -61,7 +61,8 @@ async function handle(request: Request) {
     .eq("user_id", pk.user_id)
     .maybeSingle();
 
-  const defaultModel = settings?.default_model || "openai/gpt-5-mini";
+  // Per-key default takes precedence over the account default
+  const defaultModel = pk.default_model || settings?.default_model || "openai/gpt-5-mini";
 
   // Parse body
   let body: any;
