@@ -17,6 +17,8 @@ import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CodeTabs, buildRequestSnippets } from "@/components/CodeBlock";
 import { Analytics } from "@/components/Analytics";
+import { ModelPicker as ModelComboPicker } from "@/components/ModelPicker";
+import { ModelMultiPicker } from "@/components/ModelMultiPicker";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Litproxy" }] }),
@@ -44,6 +46,7 @@ interface ProxyKey {
   is_active: boolean;
   allowed_models: string[];
   rate_limit_per_min: number | null;
+  default_model: string | null;
   last_used_at: string | null;
   created_at: string;
 }
@@ -80,6 +83,7 @@ function Dashboard() {
   const [pkName, setPkName] = useState("");
   const [pkAllowed, setPkAllowed] = useState<string[]>([]);
   const [pkRate, setPkRate] = useState<string>("");
+  const [pkDefault, setPkDefault] = useState<string>("default");
   const [editingPk, setEditingPk] = useState<ProxyKey | null>(null);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -277,17 +281,24 @@ function Dashboard() {
     e.preventDefault();
     const newK = "lvp_" + crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
     const rate = pkRate.trim() ? Math.max(1, parseInt(pkRate, 10)) : null;
+    const def = pkDefault === "default" ? null : pkDefault;
+    // Validate per-key default is in allowed list (if list non-empty)
+    if (def && pkAllowed.length > 0 && !pkAllowed.includes(def)) {
+      return toast.error("Per-key default model must be in the allowed list (or allow all).");
+    }
     const { error } = await supabase.from("proxy_keys").insert({
       user_id: user!.id,
       name: pkName.trim() || `Key ${proxyKeys.length + 1}`,
       api_key: newK,
       allowed_models: pkAllowed,
       rate_limit_per_min: rate,
+      default_model: def,
     });
     if (error) return toast.error(error.message);
     setPkName("");
     setPkAllowed([]);
     setPkRate("");
+    setPkDefault("default");
     toast.success("Proxy key generated");
     refresh();
   };
@@ -307,12 +318,17 @@ function Dashboard() {
   const saveProxyKey = async () => {
     if (!editingPk) return;
     const rate = editingPk.rate_limit_per_min;
+    const def = editingPk.default_model;
+    if (def && editingPk.allowed_models.length > 0 && !editingPk.allowed_models.includes(def)) {
+      return toast.error("Per-key default model must be in the allowed list (or allow all).");
+    }
     const { error } = await supabase
       .from("proxy_keys")
       .update({
         name: editingPk.name.trim() || "Key",
         allowed_models: editingPk.allowed_models,
         rate_limit_per_min: rate && rate > 0 ? rate : null,
+        default_model: def || null,
       })
       .eq("id", editingPk.id);
     if (error) return toast.error(error.message);
@@ -419,46 +435,53 @@ function Dashboard() {
 
             <Card
               title="Litproxy API keys"
-              desc="Generate multiple keys, name them, and optionally limit each one to specific models or a per-minute rate."
+              desc="Generate as many keys as you need. Each key can have its own default model, an allowed-models list, and an optional per-minute rate cap."
             >
-              <form onSubmit={generateProxyKey} className="grid gap-2 md:grid-cols-[1fr_1fr_120px_auto]">
-                <input
-                  placeholder="Name (optional)"
-                  value={pkName}
-                  onChange={(e) => setPkName(e.target.value)}
-                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
-                />
-                <select
-                  multiple
-                  value={pkAllowed}
-                  onChange={(e) =>
-                    setPkAllowed(Array.from(e.target.selectedOptions).map((o) => o.value))
-                  }
-                  className="h-[38px] rounded-md border border-hairline bg-background px-2 text-[12.5px] focus:border-brand focus:outline-none"
-                  title="Hold ⌘/Ctrl to select multiple. Empty = all models."
-                >
-                  {MODELS.map((m) => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
-                <input
-                  type="number"
-                  min={1}
-                  placeholder="req/min"
-                  value={pkRate}
-                  onChange={(e) => setPkRate(e.target.value)}
-                  className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Generate
-                </button>
+              <form onSubmit={generateProxyKey} className="space-y-3">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Name (optional)">
+                    <input
+                      placeholder="e.g. team, mobile-app, scratch"
+                      value={pkName}
+                      onChange={(e) => setPkName(e.target.value)}
+                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13.5px] focus:border-brand focus:outline-none"
+                    />
+                  </Field>
+                  <Field label="Rate limit">
+                    <input
+                      type="number"
+                      min={1}
+                      placeholder="req/min · empty = unlimited"
+                      value={pkRate}
+                      onChange={(e) => setPkRate(e.target.value)}
+                      className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-3 md:grid-cols-[1fr_1fr]">
+                  <Field label="Default model for this key">
+                    <ModelComboPicker
+                      value={pkDefault}
+                      onChange={setPkDefault}
+                      defaultModelId={settings?.default_model}
+                    />
+                  </Field>
+                  <Field label="Allowed models">
+                    <ModelMultiPicker value={pkAllowed} onChange={setPkAllowed} />
+                  </Field>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="font-mono text-[10.5px] text-muted-foreground">
+                    Empty allowed list = all models · "Account default" follows your dashboard default
+                  </p>
+                  <button
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md bg-brand px-4 py-2 text-[13px] font-medium text-primary-foreground hover:bg-brand-deep"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Generate key
+                  </button>
+                </div>
               </form>
-              <p className="mt-2 font-mono text-[10.5px] text-muted-foreground">
-                Empty model list = all models allowed · Empty rate = unlimited
-              </p>
 
               <div className="mt-5 divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
                 {proxyKeys.length === 0 && (
@@ -477,11 +500,20 @@ function Dashboard() {
                         ) : (
                           <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">paused</span>
                         )}
-                        {pk.allowed_models.length > 0 && (
+                        {pk.allowed_models.length > 0 ? (
                           <span className="rounded-full border border-brand/30 bg-brand/10 px-1.5 py-0.5 font-mono text-[10px] text-brand">
                             {pk.allowed_models.length} model{pk.allowed_models.length > 1 ? "s" : ""}
                           </span>
+                        ) : (
+                          <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                            all models
+                          </span>
                         )}
+                        <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                          default: {pk.default_model
+                            ? (MODELS.find((m) => m.id === pk.default_model)?.name || pk.default_model)
+                            : "account"}
+                        </span>
                         {pk.rate_limit_per_min && (
                           <span className="rounded-full border border-hairline bg-surface px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                             {pk.rate_limit_per_min}/min
@@ -513,53 +545,66 @@ function Dashboard() {
                         {visible ? pk.api_key : `${pk.api_key.slice(0, 8)}${"•".repeat(24)}${pk.api_key.slice(-4)}`}
                       </div>
                       {editingPk?.id === pk.id && (
-                        <div className="mt-3 grid gap-2 rounded-md border border-hairline bg-surface/40 p-3 md:grid-cols-[1fr_1fr_120px_auto]">
-                          <input
-                            value={editingPk.name}
-                            onChange={(e) => setEditingPk({ ...editingPk, name: e.target.value })}
-                            placeholder="Name"
-                            className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                          />
-                          <select
-                            multiple
-                            value={editingPk.allowed_models}
-                            onChange={(e) =>
-                              setEditingPk({
-                                ...editingPk,
-                                allowed_models: Array.from(e.target.selectedOptions).map((o) => o.value),
-                              })
-                            }
-                            className="h-[38px] rounded-md border border-hairline bg-background px-2 text-[12px] focus:border-brand focus:outline-none"
-                          >
-                            {MODELS.map((m) => (
-                              <option key={m.id} value={m.id}>{m.name}</option>
-                            ))}
-                          </select>
-                          <input
-                            type="number"
-                            min={1}
-                            placeholder="req/min"
-                            value={editingPk.rate_limit_per_min ?? ""}
-                            onChange={(e) =>
-                              setEditingPk({
-                                ...editingPk,
-                                rate_limit_per_min: e.target.value ? parseInt(e.target.value, 10) : null,
-                              })
-                            }
-                            className="rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
-                          />
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={saveProxyKey}
-                              className="inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:bg-brand-deep"
-                            >
-                              <Check className="h-3.5 w-3.5" /> Save
-                            </button>
+                        <div className="mt-3 space-y-3 rounded-md border border-hairline bg-surface/40 p-3">
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <Field label="Name">
+                              <input
+                                value={editingPk.name}
+                                onChange={(e) => setEditingPk({ ...editingPk, name: e.target.value })}
+                                placeholder="Name"
+                                className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                              />
+                            </Field>
+                            <Field label="Rate limit (req/min)">
+                              <input
+                                type="number"
+                                min={1}
+                                placeholder="empty = unlimited"
+                                value={editingPk.rate_limit_per_min ?? ""}
+                                onChange={(e) =>
+                                  setEditingPk({
+                                    ...editingPk,
+                                    rate_limit_per_min: e.target.value ? parseInt(e.target.value, 10) : null,
+                                  })
+                                }
+                                className="w-full rounded-md border border-hairline bg-background px-3 py-2 text-[13px] focus:border-brand focus:outline-none"
+                              />
+                            </Field>
+                          </div>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <Field label="Default model for this key">
+                              <ModelComboPicker
+                                value={editingPk.default_model || "default"}
+                                onChange={(id) =>
+                                  setEditingPk({
+                                    ...editingPk,
+                                    default_model: id === "default" ? null : id,
+                                  })
+                                }
+                                defaultModelId={settings?.default_model}
+                              />
+                            </Field>
+                            <Field label="Allowed models">
+                              <ModelMultiPicker
+                                value={editingPk.allowed_models}
+                                onChange={(ids) =>
+                                  setEditingPk({ ...editingPk, allowed_models: ids })
+                                }
+                              />
+                            </Field>
+                          </div>
+                          <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => setEditingPk(null)}
                               className="rounded-md border border-hairline px-3 py-1.5 text-[12.5px] text-foreground/70 hover:border-foreground/40"
                             >
                               Cancel
+                            </button>
+                            <button
+                              onClick={saveProxyKey}
+                              className="inline-flex items-center gap-1 rounded-md bg-brand px-3 py-1.5 text-[12.5px] font-medium text-primary-foreground hover:bg-brand-deep"
+                            >
+                              <Check className="h-3.5 w-3.5" /> Save
                             </button>
                           </div>
                         </div>
