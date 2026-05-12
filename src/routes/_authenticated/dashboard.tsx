@@ -44,6 +44,7 @@ interface ProxyKey {
   is_active: boolean;
   allowed_models: string[];
   rate_limit_per_min: number | null;
+  default_model: string | null;
   last_used_at: string | null;
   created_at: string;
 }
@@ -80,6 +81,7 @@ function Dashboard() {
   const [pkName, setPkName] = useState("");
   const [pkAllowed, setPkAllowed] = useState<string[]>([]);
   const [pkRate, setPkRate] = useState<string>("");
+  const [pkDefault, setPkDefault] = useState<string>("default");
   const [editingPk, setEditingPk] = useState<ProxyKey | null>(null);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
