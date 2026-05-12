@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/playground")({
 interface Settings {
   user_id: string;
   default_model: string;
-  proxy_api_key: string;
 }
 interface KeyRow { id: string; label: string; is_active: boolean }
 type Role = "system" | "user" | "assistant";
@@ -59,6 +58,7 @@ const defaultParams: Params = {
 function Playground() {
   const { user } = useAuth();
   const [settings, setSettings] = useState<Settings | null>(null);
+  const [proxyKey, setProxyKey] = useState<string>("");
   const [keys, setKeys] = useState<KeyRow[]>([]);
   const [params, setParams] = useState<Params>(defaultParams);
 
@@ -84,9 +84,12 @@ function Playground() {
     Promise.all([
       supabase.from("user_settings").select("*").maybeSingle(),
       supabase.from("lightning_keys").select("id, label, is_active").order("created_at", { ascending: false }),
-    ]).then(([s, k]) => {
+      supabase.from("proxy_keys").select("api_key, is_active").order("created_at", { ascending: true }),
+    ]).then(([s, k, p]) => {
       if (s.data) setSettings(s.data as Settings);
       if (k.data) setKeys((k.data as KeyRow[]).filter((x) => x.is_active));
+      const first = (p.data as { api_key: string; is_active: boolean }[] | null)?.find((r) => r.is_active);
+      if (first) setProxyKey(first.api_key);
     });
   }, [user]);
 
@@ -116,7 +119,7 @@ function Playground() {
   const headersFor = (): Record<string, string> => {
     const h: Record<string, string> = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${settings?.proxy_api_key || ""}`,
+      Authorization: `Bearer ${proxyKey}`,
     };
     if (params.keyId !== "auto") h["X-Lightning-Key-Id"] = params.keyId;
     return h;
@@ -253,7 +256,7 @@ function Playground() {
   const codeSnippets = useMemo(() => {
     const messages = chat.length > 1 ? chat : [{ role: "user", content: single }];
     const body = buildBody(messages as Msg[]);
-    const apiKey = settings?.proxy_api_key || "<your_proxy_key>";
+    const apiKey = proxyKey || "<your_proxy_key>";
     const bodyJson = JSON.stringify(body, null, 2);
     return [
       {
