@@ -17,6 +17,8 @@ import { formatDistanceToNow } from "date-fns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CodeTabs, buildRequestSnippets } from "@/components/CodeBlock";
 import { Analytics } from "@/components/Analytics";
+import { ModelPicker as ModelComboPicker } from "@/components/ModelPicker";
+import { ModelMultiPicker } from "@/components/ModelMultiPicker";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Litproxy" }] }),
