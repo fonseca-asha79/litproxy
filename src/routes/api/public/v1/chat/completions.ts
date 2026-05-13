@@ -87,6 +87,10 @@ async function handle(request: Request) {
 
   body.model = modelToUse;
   const isStream = !!body?.stream;
+  // Force usage chunk on streaming so we can log token counts.
+  if (isStream) {
+    body.stream_options = { ...(body.stream_options || {}), include_usage: true };
+  }
 
   // Capture caller UA so we can forward it upstream + log it for debugging WAF blocks.
   const callerUA = request.headers.get("user-agent") || "";
@@ -172,23 +176,63 @@ async function handle(request: Request) {
       attempts.push({ key_id: key.id, key_label: key.label, http_status: upstream.status, ms });
 
       if (isStream) {
-        // Stream-through; we cannot count tokens reliably without parsing SSE.
-        await logRequest({
-          user_id: pk.user_id,
-      proxy_key_id: pk.id,
-          model_requested: requestedModel,
-          model_used: modelToUse,
-          lightning_key_id: key.id,
-          lightning_key_label: key.label,
-          status: "success",
-          http_status: 200,
-          latency_ms: Date.now() - started,
-          attempts: attempts.length,
-          attempt_details: attempts,
-          request_body: loggedBody,
-          caller_user_agent: callerUA,
-        });
-        return new Response(upstream.body, {
+        // Tee the upstream SSE so we can both forward it AND parse the final
+        // `usage` chunk (emitted when stream_options.include_usage is true).
+        const [a, b] = upstream.body!.tee();
+
+        // Background task: parse `b` for usage, then log.
+        (async () => {
+          let pt = 0, ct = 0, tt = 0;
+          try {
+            const reader = b.getReader();
+            const decoder = new TextDecoder();
+            let buf = "";
+            while (true) {
+              const { value, done } = await reader.read();
+              if (done) break;
+              buf += decoder.decode(value, { stream: true });
+              let idx;
+              while ((idx = buf.indexOf("\n")) >= 0) {
+                const line = buf.slice(0, idx).trim();
+                buf = buf.slice(idx + 1);
+                if (!line.startsWith("data:")) continue;
+                const payload = line.slice(5).trim();
+                if (!payload || payload === "[DONE]") continue;
+                try {
+                  const obj = JSON.parse(payload);
+                  const u = obj?.usage;
+                  if (u) {
+                    pt = u.prompt_tokens ?? u.input_tokens ?? pt;
+                    ct = u.completion_tokens ?? u.output_tokens ?? ct;
+                    tt = u.total_tokens ?? (pt + ct);
+                  }
+                } catch {}
+              }
+            }
+          } catch {}
+          const cost = pt || ct ? computeCost(modelToUse, pt, ct) : null;
+          await logRequest({
+            user_id: pk.user_id,
+            proxy_key_id: pk.id,
+            model_requested: requestedModel,
+            model_used: modelToUse,
+            lightning_key_id: key.id,
+            lightning_key_label: key.label,
+            status: "success",
+            http_status: 200,
+            prompt_tokens: pt || null,
+            completion_tokens: ct || null,
+            total_tokens: tt || null,
+            cost_usd: cost,
+            latency_ms: Date.now() - started,
+            attempts: attempts.length,
+            attempt_details: attempts,
+            request_body: loggedBody,
+            caller_user_agent: callerUA,
+          });
+        })();
+
+        return new Response(a, {
           status: 200,
           headers: {
             "Content-Type": upstream.headers.get("content-type") || "text/event-stream",
@@ -200,8 +244,8 @@ async function handle(request: Request) {
 
       const json = await upstream.json();
       const usage = json?.usage || {};
-      const pt = usage.prompt_tokens ?? 0;
-      const ct = usage.completion_tokens ?? 0;
+      const pt = usage.prompt_tokens ?? usage.input_tokens ?? 0;
+      const ct = usage.completion_tokens ?? usage.output_tokens ?? 0;
       const tt = usage.total_tokens ?? pt + ct;
       const cost = computeCost(modelToUse, pt, ct);
 
