@@ -87,6 +87,10 @@ async function handle(request: Request) {
 
   body.model = modelToUse;
   const isStream = !!body?.stream;
+  // Force usage chunk on streaming so we can log token counts.
+  if (isStream) {
+    body.stream_options = { ...(body.stream_options || {}), include_usage: true };
+  }
 
   // Capture caller UA so we can forward it upstream + log it for debugging WAF blocks.
   const callerUA = request.headers.get("user-agent") || "";
