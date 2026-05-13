@@ -168,6 +168,41 @@ function Dashboard() {
     refresh();
   };
 
+  const toggleSelectKey = (id: string) => {
+    setSelectedKeys((prev) => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedKeys.size === keys.length) setSelectedKeys(new Set());
+    else setSelectedKeys(new Set(keys.map((k) => k.id)));
+  };
+
+  const bulkSetActive = async (active: boolean) => {
+    if (selectedKeys.size === 0) return;
+    const ids = Array.from(selectedKeys);
+    const { error } = await supabase.from("lightning_keys").update({ is_active: active }).in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(`${active ? "Activated" : "Paused"} ${ids.length} key${ids.length > 1 ? "s" : ""}`);
+    setSelectedKeys(new Set());
+    refresh();
+  };
+
+  const bulkDelete = async () => {
+    if (selectedKeys.size === 0) return;
+    const ids = Array.from(selectedKeys);
+    if (!confirm(`Delete ${ids.length} key${ids.length > 1 ? "s" : ""}? This cannot be undone.`)) return;
+    const { error } = await supabase.from("lightning_keys").delete().in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(`Deleted ${ids.length} key${ids.length > 1 ? "s" : ""}`);
+    setSelectedKeys(new Set());
+    refresh();
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const exportKeys = (format: "json" | "csv") => {
