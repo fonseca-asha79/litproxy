@@ -883,6 +883,7 @@ function Dashboard() {
                     </div>
                   </div>
                 ))}
+                </div>
               </div>
             </Card>
           </TabsContent>
