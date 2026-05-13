@@ -786,7 +786,50 @@ function Dashboard() {
                 </form>
               )}
 
-              <div className="mt-6 divide-y divide-hairline overflow-hidden rounded-lg border border-hairline">
+              <div className="mt-6 overflow-hidden rounded-lg border border-hairline">
+                {keys.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-hairline bg-surface/60 px-4 py-2.5 text-[12px]">
+                    <label className="inline-flex cursor-pointer items-center gap-2 text-foreground/70">
+                      <input
+                        type="checkbox"
+                        checked={selectedKeys.size === keys.length && keys.length > 0}
+                        ref={(el) => {
+                          if (el) el.indeterminate = selectedKeys.size > 0 && selectedKeys.size < keys.length;
+                        }}
+                        onChange={toggleSelectAll}
+                        className="h-3.5 w-3.5 cursor-pointer accent-brand"
+                      />
+                      <span>
+                        {selectedKeys.size === 0
+                          ? `Select all (${keys.length})`
+                          : `${selectedKeys.size} selected`}
+                      </span>
+                    </label>
+                    {selectedKeys.size > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => bulkSetActive(true)}
+                          className="rounded-md border border-hairline bg-background px-2.5 py-1 text-foreground/80 hover:border-success/40 hover:text-success"
+                        >
+                          Activate
+                        </button>
+                        <button
+                          onClick={() => bulkSetActive(false)}
+                          className="rounded-md border border-hairline bg-background px-2.5 py-1 text-foreground/80 hover:border-foreground/40 hover:text-foreground"
+                        >
+                          Pause
+                        </button>
+                        <button
+                          onClick={bulkDelete}
+                          className="rounded-md border border-hairline bg-background px-2.5 py-1 text-destructive hover:border-destructive/40"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <div className="divide-y divide-hairline">
                 {keys.length === 0 && (
                   <div className="bg-background py-12 text-center text-[14px] text-muted-foreground">
                     No keys yet. Add one to begin.
@@ -794,9 +837,17 @@ function Dashboard() {
                 )}
                 {keys.map((k, i) => (
                   <div key={k.id} className="grid grid-cols-12 items-center gap-4 bg-background px-4 py-4">
-                    <span className="col-span-1 font-mono text-[11px] text-muted-foreground">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
+                    <div className="col-span-1 flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedKeys.has(k.id)}
+                        onChange={() => toggleSelectKey(k.id)}
+                        className="h-3.5 w-3.5 cursor-pointer accent-brand"
+                      />
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </div>
                     <div className="col-span-7 min-w-0">
                       <div className="flex flex-wrap items-baseline gap-2">
                         <span className="text-[14px] font-medium">{k.label}</span>
