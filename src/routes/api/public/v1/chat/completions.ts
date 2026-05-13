@@ -237,12 +237,18 @@ async function handle(request: Request) {
       errText = await upstream.text();
     } catch {}
     attempts.push({ key_id: key.id, key_label: key.label, http_status: upstream.status, error: errText.slice(0, 1000), ms });
+    // Auto-pause keys with insufficient balance — they won't recover on retry.
+    const insufficient =
+      /insufficient[_\s-]?balance/i.test(errText) ||
+      /not\s+have\s+enough\s+credits/i.test(errText) ||
+      (upstream.status === 402);
     await supabaseAdmin
       .from("lightning_keys")
       .update({
         failure_count: ((key as any).failure_count || 0) + 1,
         last_error: errText.slice(0, 500),
         last_used_at: new Date().toISOString(),
+        ...(insufficient ? { is_active: false } : {}),
       })
       .eq("id", key.id);
   }
