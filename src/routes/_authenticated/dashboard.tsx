@@ -476,7 +476,7 @@ function Dashboard() {
           </TabsList>
 
           {/* ============ OVERVIEW ============ */}
-          <TabsContent value="overview" className="space-y-8 mt-0">
+          <TabsContent value="overview" className="space-y-8 mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Card title="Endpoint" desc="Drop-in replacement for the OpenAI base URL.">
               <Field label="Base URL">
                 <div className="flex items-center gap-2">
@@ -690,7 +690,7 @@ function Dashboard() {
           </TabsContent>
 
           {/* ============ KEYS ============ */}
-          <TabsContent value="keys" className="mt-0">
+          <TabsContent value="keys" className="mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Card
               title="Lightning AI keys"
               desc="Keys rotate by least-recent use. If one fails, the next is tried automatically."
@@ -920,12 +920,12 @@ function Dashboard() {
           </TabsContent>
 
           {/* ============ ANALYTICS ============ */}
-          <TabsContent value="analytics" className="mt-0">
+          <TabsContent value="analytics" className="mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Analytics logs={logs} keys={keys.map((k) => ({ id: k.id, label: k.label }))} />
           </TabsContent>
 
           {/* ============ LOGS ============ */}
-          <TabsContent value="logs" className="mt-0">
+          <TabsContent value="logs" className="mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Card
               title="Recent requests"
               desc="Last 1000 calls — tokens, latency, cost."
