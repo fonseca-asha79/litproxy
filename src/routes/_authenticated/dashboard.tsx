@@ -400,7 +400,7 @@ function Dashboard() {
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-6xl px-6 pt-12 pb-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
+            <div className="anim-fade-up">
               <p className="eyebrow">Workspace</p>
               <h1 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
                 Hi{user?.email ? `, ${user.email.split("@")[0]}` : ""}.
@@ -411,17 +411,25 @@ function Dashboard() {
             </div>
             <Link
               to="/playground"
-              className="inline-flex items-center gap-1.5 rounded-md border border-hairline bg-surface px-3.5 py-2 text-[13px] hover:border-brand/40 hover:text-brand"
+              className="anim-fade-up group inline-flex items-center gap-1.5 rounded-md border border-hairline bg-surface px-3.5 py-2 text-[13px] transition-colors hover:border-brand/40 hover:text-brand"
+              style={{ animationDelay: "120ms" }}
             >
-              Open playground <ArrowUpRight className="h-3.5 w-3.5" />
+              Open playground{" "}
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </Link>
           </div>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat label="Requests" value={logs.length.toString()} />
-            <Stat label="Tokens" value={totalTokens.toLocaleString()} />
-            <Stat label="Spent" value={`$${totalCost.toFixed(4)}`} accent />
-            <Stat label="Success" value={`${successRate}%`} />
+            {[
+              <Stat key="r" label="Requests" value={logs.length.toString()} />,
+              <Stat key="t" label="Tokens" value={totalTokens.toLocaleString()} />,
+              <Stat key="s" label="Spent" value={`$${totalCost.toFixed(4)}`} accent />,
+              <Stat key="ok" label="Success" value={`${successRate}%`} />,
+            ].map((node, i) => (
+              <div key={i} className="anim-fade-up" style={{ animationDelay: `${180 + i * 80}ms` }}>
+                {node}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -964,7 +972,7 @@ function Dashboard() {
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface/60 p-4">
+    <div className="group rounded-xl border border-hairline bg-surface/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-surface hover:shadow-[0_15px_30px_-15px_oklch(0.85_0.18_165/0.25)]">
       <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className={"mt-2 text-2xl font-semibold tracking-tight " + (accent ? "text-brand" : "")}>{value}</div>
     </div>

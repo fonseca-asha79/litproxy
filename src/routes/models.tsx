@@ -69,9 +69,9 @@ function ModelsPage() {
       <section className="relative border-b border-hairline">
         <div className="absolute inset-0 bg-grid bg-grid-fade opacity-40" />
         <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-12">
-          <p className="eyebrow">Catalog</p>
-          <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">Models</h1>
-          <p className="mt-4 max-w-xl text-[15px] text-foreground/65">
+          <p className="anim-fade-in eyebrow">Catalog</p>
+          <h1 className="anim-blur-in mt-3 text-5xl font-semibold tracking-tight md:text-6xl" style={{ animationDelay: "80ms" }}>Models</h1>
+          <p className="anim-fade-up mt-4 max-w-xl text-[15px] text-foreground/65" style={{ animationDelay: "200ms" }}>
             {MODELS.length} models. Prices in USD per 1M tokens. Click a model id to copy it.
           </p>
 
@@ -122,10 +122,11 @@ function ModelsPage() {
 
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((m) => (
+          {filtered.map((m, i) => (
             <article
               key={m.id}
-              className="group rounded-xl border border-hairline bg-surface/60 p-5 transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:bg-surface"
+              className="anim-fade-up group rounded-xl border border-hairline bg-surface/60 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:bg-surface hover:shadow-[0_20px_40px_-20px_oklch(0.85_0.18_165/0.3)]"
+              style={{ animationDelay: `${Math.min(i, 18) * 35}ms` }}
             >
               <div className="flex items-center justify-between">
                 <span className="rounded-full border border-hairline bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-foreground/70">

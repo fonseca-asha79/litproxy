@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
+import { Reveal } from "@/components/Reveal";
 import { MODELS } from "@/lib/models";
 import { ArrowRight, Zap, Shield, Repeat, LineChart } from "lucide-react";
 
@@ -40,44 +41,57 @@ function Home() {
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-28 text-center md:pt-32 md:pb-36">
           <Link
             to="/models"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3 py-1 text-[12px] text-foreground/80 backdrop-blur transition-colors hover:border-brand/40 hover:text-foreground"
+            className="anim-fade-in inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3 py-1 text-[12px] text-foreground/80 backdrop-blur transition-colors hover:border-brand/40 hover:text-foreground"
+            style={{ animationDelay: "60ms" }}
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+            <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-brand" />
             {MODELS.length} models available
             <ArrowRight className="h-3 w-3" />
           </Link>
 
-          <h1 className="mt-8 text-balance text-[clamp(2.5rem,7vw,5rem)] font-semibold leading-[1.05] tracking-tight">
+          <h1
+            className="anim-blur-in mt-8 text-balance text-[clamp(2.5rem,7vw,5rem)] font-semibold leading-[1.05] tracking-tight"
+            style={{ animationDelay: "120ms" }}
+          >
             One endpoint.<br />
             <span className="bg-gradient-to-r from-brand to-brand-deep bg-clip-text text-transparent">
               All your keys.
             </span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-xl text-balance text-[17px] leading-relaxed text-foreground/65">
+          <p
+            className="anim-fade-up mx-auto mt-6 max-w-xl text-balance text-[17px] leading-relaxed text-foreground/65"
+            style={{ animationDelay: "260ms" }}
+          >
             An OpenAI-compatible proxy for Lightning AI. Rotates keys, falls back on failure,
             logs every token and cent.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div
+            className="anim-fade-up mt-10 flex flex-wrap items-center justify-center gap-3"
+            style={{ animationDelay: "380ms" }}
+          >
             <Link
               to="/register"
-              className="group inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-brand-deep"
+              className="group inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground shadow-[0_0_0_0_oklch(0.85_0.18_165/0.4)] transition-all hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-[0_10px_30px_-10px_oklch(0.85_0.18_165/0.6)]"
             >
               Start for free
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               to="/models"
-              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface/60 px-5 py-2.5 text-[14px] text-foreground/80 backdrop-blur transition-colors hover:border-foreground/40 hover:text-foreground"
+              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface/60 px-5 py-2.5 text-[14px] text-foreground/80 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-foreground/40 hover:text-foreground"
             >
               Browse models
             </Link>
           </div>
 
           {/* Terminal */}
-          <div className="mx-auto mt-16 max-w-3xl text-left">
-            <div className="overflow-hidden rounded-xl border border-hairline bg-surface/80 shadow-2xl backdrop-blur">
+          <div
+            className="anim-scale-in mx-auto mt-16 max-w-3xl text-left"
+            style={{ animationDelay: "520ms" }}
+          >
+            <div className="overflow-hidden rounded-xl border border-hairline bg-surface/80 shadow-2xl backdrop-blur transition-shadow hover:shadow-[0_30px_80px_-20px_oklch(0.85_0.18_165/0.25)]">
               <div className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
                 <div className="flex items-center gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-foreground/15" />
@@ -107,12 +121,12 @@ resp = client.chat.completions.create({"\n"}
       {/* FEATURES */}
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="max-w-2xl">
+          <Reveal className="max-w-2xl">
             <p className="eyebrow">Features</p>
             <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
               Built for resilience, not noise.
             </h2>
-          </div>
+          </Reveal>
 
           <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-hairline bg-hairline md:grid-cols-2 lg:grid-cols-4">
             {[
@@ -120,14 +134,18 @@ resp = client.chat.completions.create({"\n"}
               { icon: Repeat, t: "Smart rotation", d: "Each request picks the key idle the longest. Load is spread automatically." },
               { icon: Shield, t: "Auto fallback", d: "If a key returns an error, the next one is tried. The caller never notices." },
               { icon: LineChart, t: "Full observability", d: "Every request logs tokens, latency, errors and USD cost." },
-            ].map((f) => (
-              <div key={f.t} className="bg-background p-6 transition-colors hover:bg-surface">
-                <div className="grid h-9 w-9 place-items-center rounded-md border border-hairline bg-surface text-brand">
+            ].map((f, i) => (
+              <Reveal
+                key={f.t}
+                delay={i * 90}
+                className="group bg-background p-6 transition-colors hover:bg-surface"
+              >
+                <div className="grid h-9 w-9 place-items-center rounded-md border border-hairline bg-surface text-brand transition-transform group-hover:-rotate-6 group-hover:scale-110">
                   <f.icon className="h-4 w-4" />
                 </div>
                 <h3 className="mt-5 text-[15px] font-semibold">{f.t}</h3>
                 <p className="mt-2 text-[13.5px] leading-relaxed text-foreground/60">{f.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -136,7 +154,7 @@ resp = client.chat.completions.create({"\n"}
       {/* MODELS */}
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <Reveal className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="eyebrow">Catalog</p>
               <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
@@ -145,17 +163,19 @@ resp = client.chat.completions.create({"\n"}
             </div>
             <Link
               to="/models"
-              className="inline-flex items-center gap-1.5 text-[13px] text-foreground/70 hover:text-brand"
+              className="group inline-flex items-center gap-1.5 text-[13px] text-foreground/70 transition-colors hover:text-brand"
             >
-              View all <ArrowRight className="h-3.5 w-3.5" />
+              View all{" "}
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
-          </div>
+          </Reveal>
 
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((m) => (
-              <div
+            {featured.map((m, i) => (
+              <Reveal
                 key={m.id}
-                className="group rounded-xl border border-hairline bg-surface/60 p-5 transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:bg-surface"
+                delay={i * 70}
+                className="group rounded-xl border border-hairline bg-surface/60 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:bg-surface hover:shadow-[0_20px_40px_-20px_oklch(0.85_0.18_165/0.3)]"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -175,7 +195,7 @@ resp = client.chat.completions.create({"\n"}
                     <div className="text-[15px] font-medium text-brand">${m.outputPrice}</div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -184,7 +204,7 @@ resp = client.chat.completions.create({"\n"}
       {/* CTA */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-30" />
-        <div className="relative mx-auto max-w-4xl px-6 py-28 text-center">
+        <Reveal variant="scale-in" className="relative mx-auto max-w-4xl px-6 py-28 text-center">
           <h2 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
             Ship in <span className="text-brand">30 seconds</span>.
           </h2>
@@ -193,11 +213,12 @@ resp = client.chat.completions.create({"\n"}
           </p>
           <Link
             to="/register"
-            className="mt-8 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-brand-deep"
+            className="group mt-8 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-[0_10px_30px_-10px_oklch(0.85_0.18_165/0.6)]"
           >
-            Create your endpoint <ArrowRight className="h-4 w-4" />
+            Create your endpoint{" "}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="border-t border-hairline">
