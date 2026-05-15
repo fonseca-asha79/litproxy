@@ -41,36 +41,46 @@ function Home() {
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-28 text-center md:pt-32 md:pb-36">
           <Link
             to="/models"
-            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3 py-1 text-[12px] text-foreground/80 backdrop-blur transition-colors hover:border-brand/40 hover:text-foreground"
+            className="anim-fade-in inline-flex items-center gap-2 rounded-full border border-hairline bg-surface/60 px-3 py-1 text-[12px] text-foreground/80 backdrop-blur transition-colors hover:border-brand/40 hover:text-foreground"
+            style={{ animationDelay: "60ms" }}
           >
-            <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+            <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-brand" />
             {MODELS.length} models available
             <ArrowRight className="h-3 w-3" />
           </Link>
 
-          <h1 className="mt-8 text-balance text-[clamp(2.5rem,7vw,5rem)] font-semibold leading-[1.05] tracking-tight">
+          <h1
+            className="anim-blur-in mt-8 text-balance text-[clamp(2.5rem,7vw,5rem)] font-semibold leading-[1.05] tracking-tight"
+            style={{ animationDelay: "120ms" }}
+          >
             One endpoint.<br />
             <span className="bg-gradient-to-r from-brand to-brand-deep bg-clip-text text-transparent">
               All your keys.
             </span>
           </h1>
 
-          <p className="mx-auto mt-6 max-w-xl text-balance text-[17px] leading-relaxed text-foreground/65">
+          <p
+            className="anim-fade-up mx-auto mt-6 max-w-xl text-balance text-[17px] leading-relaxed text-foreground/65"
+            style={{ animationDelay: "260ms" }}
+          >
             An OpenAI-compatible proxy for Lightning AI. Rotates keys, falls back on failure,
             logs every token and cent.
           </p>
 
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div
+            className="anim-fade-up mt-10 flex flex-wrap items-center justify-center gap-3"
+            style={{ animationDelay: "380ms" }}
+          >
             <Link
               to="/register"
-              className="group inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-brand-deep"
+              className="group inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground shadow-[0_0_0_0_oklch(0.85_0.18_165/0.4)] transition-all hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-[0_10px_30px_-10px_oklch(0.85_0.18_165/0.6)]"
             >
               Start for free
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               to="/models"
-              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface/60 px-5 py-2.5 text-[14px] text-foreground/80 backdrop-blur transition-colors hover:border-foreground/40 hover:text-foreground"
+              className="inline-flex items-center gap-2 rounded-md border border-hairline bg-surface/60 px-5 py-2.5 text-[14px] text-foreground/80 backdrop-blur transition-all hover:-translate-y-0.5 hover:border-foreground/40 hover:text-foreground"
             >
               Browse models
             </Link>
