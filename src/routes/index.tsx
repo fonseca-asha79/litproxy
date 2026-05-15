@@ -154,7 +154,7 @@ resp = client.chat.completions.create({"\n"}
       {/* MODELS */}
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <Reveal className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="eyebrow">Catalog</p>
               <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
@@ -163,17 +163,19 @@ resp = client.chat.completions.create({"\n"}
             </div>
             <Link
               to="/models"
-              className="inline-flex items-center gap-1.5 text-[13px] text-foreground/70 hover:text-brand"
+              className="group inline-flex items-center gap-1.5 text-[13px] text-foreground/70 transition-colors hover:text-brand"
             >
-              View all <ArrowRight className="h-3.5 w-3.5" />
+              View all{" "}
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
-          </div>
+          </Reveal>
 
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((m) => (
-              <div
+            {featured.map((m, i) => (
+              <Reveal
                 key={m.id}
-                className="group rounded-xl border border-hairline bg-surface/60 p-5 transition-all hover:-translate-y-0.5 hover:border-brand/30 hover:bg-surface"
+                delay={i * 70}
+                className="group rounded-xl border border-hairline bg-surface/60 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand/30 hover:bg-surface hover:shadow-[0_20px_40px_-20px_oklch(0.85_0.18_165/0.3)]"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -193,7 +195,7 @@ resp = client.chat.completions.create({"\n"}
                     <div className="text-[15px] font-medium text-brand">${m.outputPrice}</div>
                   </div>
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -202,7 +204,7 @@ resp = client.chat.completions.create({"\n"}
       {/* CTA */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-grid opacity-30" />
-        <div className="relative mx-auto max-w-4xl px-6 py-28 text-center">
+        <Reveal variant="scale-in" className="relative mx-auto max-w-4xl px-6 py-28 text-center">
           <h2 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
             Ship in <span className="text-brand">30 seconds</span>.
           </h2>
@@ -211,11 +213,12 @@ resp = client.chat.completions.create({"\n"}
           </p>
           <Link
             to="/register"
-            className="mt-8 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground transition-colors hover:bg-brand-deep"
+            className="group mt-8 inline-flex items-center gap-2 rounded-md bg-brand px-5 py-2.5 text-[14px] font-medium text-primary-foreground transition-all hover:-translate-y-0.5 hover:bg-brand-deep hover:shadow-[0_10px_30px_-10px_oklch(0.85_0.18_165/0.6)]"
           >
-            Create your endpoint <ArrowRight className="h-4 w-4" />
+            Create your endpoint{" "}
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
-        </div>
+        </Reveal>
       </section>
 
       <footer className="border-t border-hairline">
