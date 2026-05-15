@@ -86,6 +86,20 @@ function Dashboard() {
   const [pkDefault, setPkDefault] = useState<string>("default");
   const [editingPk, setEditingPk] = useState<ProxyKey | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const VALID_TABS = ["overview", "keys", "analytics", "logs"] as const;
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window === "undefined") return "overview";
+    const h = window.location.hash.replace(/^#/, "");
+    return (VALID_TABS as readonly string[]).includes(h) ? h : "overview";
+  });
+  useEffect(() => {
+    const onHash = () => {
+      const h = window.location.hash.replace(/^#/, "");
+      if ((VALID_TABS as readonly string[]).includes(h)) setActiveTab(h);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const endpoint = `${baseUrl}/api/public/v1`;
