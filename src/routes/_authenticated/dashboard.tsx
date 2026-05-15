@@ -972,7 +972,7 @@ function Dashboard() {
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="rounded-xl border border-hairline bg-surface/60 p-4">
+    <div className="group rounded-xl border border-hairline bg-surface/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand/30 hover:bg-surface hover:shadow-[0_15px_30px_-15px_oklch(0.85_0.18_165/0.25)]">
       <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
       <div className={"mt-2 text-2xl font-semibold tracking-tight " + (accent ? "text-brand" : "")}>{value}</div>
     </div>
