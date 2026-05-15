@@ -86,6 +86,20 @@ function Dashboard() {
   const [pkDefault, setPkDefault] = useState<string>("default");
   const [editingPk, setEditingPk] = useState<ProxyKey | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
+  const VALID_TABS = ["overview", "keys", "analytics", "logs"] as const;
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window === "undefined") return "overview";
+    const h = window.location.hash.replace(/^#/, "");
+    return (VALID_TABS as readonly string[]).includes(h) ? h : "overview";
+  });
+  useEffect(() => {
+    const onHash = () => {
+      const h = window.location.hash.replace(/^#/, "");
+      if ((VALID_TABS as readonly string[]).includes(h)) setActiveTab(h);
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const endpoint = `${baseUrl}/api/public/v1`;
@@ -435,7 +449,16 @@ function Dashboard() {
       </section>
 
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => {
+            setActiveTab(v);
+            if (typeof window !== "undefined") {
+              window.history.replaceState(null, "", `#${v}`);
+            }
+          }}
+          className="w-full"
+        >
           <TabsList className="mb-8 grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
             <TabsTrigger value="overview" className="gap-1.5">
               <SettingsIcon className="h-3.5 w-3.5" /> Overview
@@ -453,7 +476,7 @@ function Dashboard() {
           </TabsList>
 
           {/* ============ OVERVIEW ============ */}
-          <TabsContent value="overview" className="space-y-8 mt-0">
+          <TabsContent value="overview" className="space-y-8 mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Card title="Endpoint" desc="Drop-in replacement for the OpenAI base URL.">
               <Field label="Base URL">
                 <div className="flex items-center gap-2">
@@ -667,7 +690,7 @@ function Dashboard() {
           </TabsContent>
 
           {/* ============ KEYS ============ */}
-          <TabsContent value="keys" className="mt-0">
+          <TabsContent value="keys" className="mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Card
               title="Lightning AI keys"
               desc="Keys rotate by least-recent use. If one fails, the next is tried automatically."
@@ -897,12 +920,12 @@ function Dashboard() {
           </TabsContent>
 
           {/* ============ ANALYTICS ============ */}
-          <TabsContent value="analytics" className="mt-0">
+          <TabsContent value="analytics" className="mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Analytics logs={logs} keys={keys.map((k) => ({ id: k.id, label: k.label }))} />
           </TabsContent>
 
           {/* ============ LOGS ============ */}
-          <TabsContent value="logs" className="mt-0">
+          <TabsContent value="logs" className="mt-0 data-[state=active]:animate-in data-[state=active]:fade-in-50 data-[state=active]:slide-in-from-right-4 data-[state=active]:duration-300">
             <Card
               title="Recent requests"
               desc="Last 1000 calls — tokens, latency, cost."
