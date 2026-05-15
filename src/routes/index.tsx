@@ -121,12 +121,12 @@ resp = client.chat.completions.create({"\n"}
       {/* FEATURES */}
       <section className="border-b border-hairline">
         <div className="mx-auto max-w-6xl px-6 py-24">
-          <div className="max-w-2xl">
+          <Reveal className="max-w-2xl">
             <p className="eyebrow">Features</p>
             <h2 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
               Built for resilience, not noise.
             </h2>
-          </div>
+          </Reveal>
 
           <div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-hairline bg-hairline md:grid-cols-2 lg:grid-cols-4">
             {[
@@ -134,14 +134,18 @@ resp = client.chat.completions.create({"\n"}
               { icon: Repeat, t: "Smart rotation", d: "Each request picks the key idle the longest. Load is spread automatically." },
               { icon: Shield, t: "Auto fallback", d: "If a key returns an error, the next one is tried. The caller never notices." },
               { icon: LineChart, t: "Full observability", d: "Every request logs tokens, latency, errors and USD cost." },
-            ].map((f) => (
-              <div key={f.t} className="bg-background p-6 transition-colors hover:bg-surface">
-                <div className="grid h-9 w-9 place-items-center rounded-md border border-hairline bg-surface text-brand">
+            ].map((f, i) => (
+              <Reveal
+                key={f.t}
+                delay={i * 90}
+                className="group bg-background p-6 transition-colors hover:bg-surface"
+              >
+                <div className="grid h-9 w-9 place-items-center rounded-md border border-hairline bg-surface text-brand transition-transform group-hover:-rotate-6 group-hover:scale-110">
                   <f.icon className="h-4 w-4" />
                 </div>
                 <h3 className="mt-5 text-[15px] font-semibold">{f.t}</h3>
                 <p className="mt-2 text-[13.5px] leading-relaxed text-foreground/60">{f.d}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
