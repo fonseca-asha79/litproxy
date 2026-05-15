@@ -69,9 +69,9 @@ function ModelsPage() {
       <section className="relative border-b border-hairline">
         <div className="absolute inset-0 bg-grid bg-grid-fade opacity-40" />
         <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-12">
-          <p className="eyebrow">Catalog</p>
-          <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">Models</h1>
-          <p className="mt-4 max-w-xl text-[15px] text-foreground/65">
+          <p className="anim-fade-in eyebrow">Catalog</p>
+          <h1 className="anim-blur-in mt-3 text-5xl font-semibold tracking-tight md:text-6xl" style={{ animationDelay: "80ms" }}>Models</h1>
+          <p className="anim-fade-up mt-4 max-w-xl text-[15px] text-foreground/65" style={{ animationDelay: "200ms" }}>
             {MODELS.length} models. Prices in USD per 1M tokens. Click a model id to copy it.
           </p>
 
