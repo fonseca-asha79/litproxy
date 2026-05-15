@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
+import { Reveal } from "@/components/Reveal";
 import { MODELS } from "@/lib/models";
 import { ArrowRight, Zap, Shield, Repeat, LineChart } from "lucide-react";
 
