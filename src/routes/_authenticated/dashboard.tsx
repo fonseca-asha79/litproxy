@@ -435,7 +435,16 @@ function Dashboard() {
       </section>
 
       <div className="mx-auto max-w-6xl px-6 py-10">
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => {
+            setActiveTab(v);
+            if (typeof window !== "undefined") {
+              window.history.replaceState(null, "", `#${v}`);
+            }
+          }}
+          className="w-full"
+        >
           <TabsList className="mb-8 grid w-full grid-cols-4 sm:w-auto sm:inline-flex">
             <TabsTrigger value="overview" className="gap-1.5">
               <SettingsIcon className="h-3.5 w-3.5" /> Overview
