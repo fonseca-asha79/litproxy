@@ -55,7 +55,7 @@ function RegisterPage() {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md items-center px-6 py-16">
-          <div className="w-full rounded-2xl border border-hairline bg-surface/70 p-8 text-center backdrop-blur">
+          <div className="anim-scale-in w-full rounded-2xl border border-hairline bg-surface/70 p-8 text-center backdrop-blur">
             <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand/15 text-brand">✉</div>
             <h1 className="mt-5 text-2xl font-semibold tracking-tight">Check your email</h1>
             <p className="mt-2 text-[13.5px] text-foreground/65">
@@ -75,7 +75,7 @@ function RegisterPage() {
       <Header />
       <div className="relative mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md items-center px-6 py-16">
         <div className="absolute inset-0 bg-grid bg-grid-fade opacity-30" />
-        <form onSubmit={submit} className="relative w-full rounded-2xl border border-hairline bg-surface/70 p-8 backdrop-blur">
+        <form onSubmit={submit} className="anim-scale-in relative w-full rounded-2xl border border-hairline bg-surface/70 p-8 backdrop-blur shadow-[0_30px_80px_-30px_oklch(0_0_0/0.6)]">
           <h1 className="text-2xl font-semibold tracking-tight">Create your account</h1>
           <p className="mt-1 text-[13px] text-foreground/60">One endpoint. All your Lightning AI keys.</p>
 
