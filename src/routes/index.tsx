@@ -32,11 +32,8 @@ function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-hairline">
-        <div className="absolute inset-0 bg-grid bg-grid-fade opacity-60" />
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[900px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
-          style={{ background: "radial-gradient(circle, oklch(0.85 0.18 165 / 0.6), transparent 70%)" }}
-        />
+        <BlobBackground />
+        <div className="absolute inset-0 bg-grid bg-grid-fade opacity-40" />
 
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-28 text-center md:pt-32 md:pb-36">
           <Link
