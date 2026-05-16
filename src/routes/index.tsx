@@ -201,7 +201,8 @@ resp = client.chat.completions.create({"\n"}
 
       {/* CTA */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-30" />
+        <BlobBackground />
+        <div className="absolute inset-0 bg-grid opacity-20" />
         <Reveal variant="scale-in" className="relative mx-auto max-w-4xl px-6 py-28 text-center">
           <h2 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
             Ship in <span className="text-brand">30 seconds</span>.
