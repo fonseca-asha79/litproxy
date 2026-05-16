@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Reveal } from "@/components/Reveal";
+import { BlobBackground } from "@/components/BlobBackground";
 import { MODELS } from "@/lib/models";
 import { ArrowRight, Zap, Shield, Repeat, LineChart } from "lucide-react";
 
@@ -32,11 +33,8 @@ function Home() {
 
       {/* HERO */}
       <section className="relative overflow-hidden border-b border-hairline">
-        <div className="absolute inset-0 bg-grid bg-grid-fade opacity-60" />
-        <div
-          className="pointer-events-none absolute left-1/2 top-0 h-[500px] w-[900px] -translate-x-1/2 rounded-full opacity-30 blur-3xl"
-          style={{ background: "radial-gradient(circle, oklch(0.85 0.18 165 / 0.6), transparent 70%)" }}
-        />
+        <BlobBackground />
+        <div className="absolute inset-0 bg-grid bg-grid-fade opacity-40" />
 
         <div className="relative mx-auto max-w-5xl px-6 pt-24 pb-28 text-center md:pt-32 md:pb-36">
           <Link
@@ -203,7 +201,8 @@ resp = client.chat.completions.create({"\n"}
 
       {/* CTA */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid opacity-30" />
+        <BlobBackground />
+        <div className="absolute inset-0 bg-grid opacity-20" />
         <Reveal variant="scale-in" className="relative mx-auto max-w-4xl px-6 py-28 text-center">
           <h2 className="text-balance text-4xl font-semibold tracking-tight md:text-5xl">
             Ship in <span className="text-brand">30 seconds</span>.
