@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { BlobBackground } from "@/components/BlobBackground";
 
 function NotFoundComponent() {
   return (
@@ -117,6 +118,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <BlobBackground fixed className="opacity-40" />
       <Outlet />
     </QueryClientProvider>
   );
